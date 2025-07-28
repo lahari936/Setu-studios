@@ -1,13 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X, ArrowUp } from 'lucide-react';
+import { Moon, Sun, Menu, X, ArrowUp, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isDark, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
+
+  // Get cart count from localStorage
+  useEffect(() => {
+    const updateCartCount = () => {
+      const savedCart = localStorage.getItem('setu-cart');
+      if (savedCart) {
+        const cart = JSON.parse(savedCart);
+        const count = cart.reduce((total: number, item: any) => total + item.quantity, 0);
+        setCartCount(count);
+      } else {
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+    // Listen for storage changes (when cart is updated from other components)
+    window.addEventListener('storage', updateCartCount);
+    // Also check periodically
+    const interval = setInterval(updateCartCount, 1000);
+
+    return () => {
+      window.removeEventListener('storage', updateCartCount);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,6 +96,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </Link>
               ))}
               
+              {/* Cart Icon */}
+              <Link
+                to="/cart"
+                className="relative p-2 rounded-lg transition-all duration-200 hover:bg-orange-500/10 hover:text-orange-500"
+              >
+                <ShoppingCart size={20} className={isDark ? 'text-gray-300' : 'text-gray-700'} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+              
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
@@ -83,6 +122,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center space-x-4">
+              {/* Cart Icon */}
+              <Link
+                to="/cart"
+                className="relative p-2 rounded-lg transition-all duration-200 hover:bg-orange-500/10 hover:text-orange-500"
+              >
+                <ShoppingCart size={20} className={isDark ? 'text-gray-300' : 'text-gray-700'} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+              
               <button
                 onClick={toggleTheme}
                 className={`p-2 rounded-lg transition-all duration-200 hover:bg-orange-500/10 hover:text-orange-500 ${

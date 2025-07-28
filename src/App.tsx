@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Packages from './pages/Packages';
+import Cart from './pages/Cart';
 import IdeaAnalyzer from './pages/IdeaAnalyzer';
 import Profile from './pages/Profile';
 
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/services" element={<Services />} />
             <Route path="/packages" element={<Packages />} />
+            <Route path="/cart" element={<Cart />} />
             <Route path="/idea-analyzer" element={<IdeaAnalyzer />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
