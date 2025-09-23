@@ -170,20 +170,6 @@ const Services: React.FC = () => {
       color: 'from-orange-500 to-orange-600',
       category: 'Fundraising & Investor Preparation'
     },
-    {
-      icon: Calculator,
-      title: 'Financial Projections',
-      description: 'Comprehensive financial modeling including revenue streams, breakeven analysis, and 3-year planning.',
-      features: [
-        'Revenue stream modeling',
-        'Breakeven analysis',
-        '3-year financial projections',
-        'Cash flow forecasting',
-        'Investment requirement analysis'
-      ],
-      color: 'from-orange-500 to-orange-600',
-      category: 'Fundraising & Investor Preparation'
-    },
     
     // Mentorship & Incubation Services
     {
@@ -338,23 +324,17 @@ const Services: React.FC = () => {
               >
                 &times;
               </button>
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center border-4 border-orange-500 shadow-lg">
-                  <span className="text-white font-bold text-2xl">ES</span>
-                </div>
-                <h2 className="text-2xl font-bold text-orange-500 text-center mb-1">E Sai Eshwar</h2>
-                <p className="text-center text-lg text-gray-300 mb-1">Founder, Setu Studios</p>
-                <a href="mailto:saieshwar@example.com" className="text-orange-400 hover:underline mb-2">saieshwar@example.com</a>
-                <p className="text-center text-base text-gray-400 mb-4">Let's connect to discuss your startup idea, answer your questions, or help you get started on your journey!</p>
-                <div className="flex gap-8 mt-2">
-                  <a href="tel:+1234567890" className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg transition-all duration-300" title="Call">
-                    <Phone size={28} />
-                  </a>
-                  <a href="mailto:saieshwar@example.com" className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg transition-all duration-300" title="Mail">
-                    <Mail size={28} />
-                  </a>
-                </div>
-              </div>
+               <div className="flex flex-col items-center gap-4">
+                 <p className="text-center text-base text-gray-400 mb-4">Let's connect to discuss your startup idea, answer your questions, or help you get started on your journey!</p>
+                 <div className="flex gap-8 mt-2">
+                   <a href="tel:+917780754541" className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg transition-all duration-300" title="Call">
+                     <Phone size={28} />
+                   </a>
+                   <a href="mailto:guidebazaar2@gmail.com" className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg transition-all duration-300" title="Mail">
+                     <Mail size={28} />
+                   </a>
+                 </div>
+               </div>
             </div>
           </div>
         )}

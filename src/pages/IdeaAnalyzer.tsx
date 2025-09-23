@@ -368,7 +368,7 @@ ${analysisData.elevator_pitch_1_minute.closing}
 
                   <div>
                     <label className="block text-sm font-medium mb-2">
-                    Idea Description <span className="text-red-500">*</span>
+                    Idea Description(*150 Words) <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="ideaDescription"
