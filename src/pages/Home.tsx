@@ -120,29 +120,6 @@ export default function Home() {
         <p className="max-w-xl text-center text-md md:text-lg text-orange-400">
           From concept to MVP and beyond, we are your partners in innovation. Let's build the future together.
         </p>
-        {/* Founder Subsection */}
-        <section
-          id="founder"
-          className="w-full flex flex-col items-center justify-center mt-16"
-        >
-          <h3 className="text-3xl md:text-4xl font-bold text-orange-500 mb-8 text-center drop-shadow-[0_0_8px_#ff6600aa]">
-            Meet the Founder
-          </h3>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 w-full max-w-3xl">
-          <img
-  src="/images/founder-setu.JPG"
-  alt="E Sai Eshwar"
-  className="w-48 h-48 rounded-full object-cover shadow-lg border-4 border-orange-500 z-10 bg-[#10122b]"
-/>
-
-            <div className="text-center md:text-left">
-              <h4 className="text-2xl font-semibold text-white mb-2">E Sai Eshwar</h4>
-              <p className="text-lg text-gray-300 max-w-md">
-                E Sai Eshwar is the visionary behind Setu Studios. With a passion for empowering founders and a background in technology and entrepreneurship, he leads the team with creativity, empathy, and a relentless drive to help others turn their ideas into impactful startups.
-              </p>
-            </div>
-          </div>
-        </section>
       </section>
     </div>
   );

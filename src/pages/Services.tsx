@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Brain, 
-  Palette, 
   Code, 
-  TrendingUp, 
   CheckCircle, 
-  Clock,
-  Target,
   Phone,
   Mail,
   Search,
@@ -54,8 +49,6 @@ const Services: React.FC = () => {
         'Industry trend analysis',
         'SWOT analysis report'
       ],
-      timeline: '3 Days',
-      price: '₹99',
       color: 'from-blue-500 to-blue-600',
       category: 'Strategy & Business Design'
     },
@@ -70,8 +63,6 @@ const Services: React.FC = () => {
         'Functional requirements specification',
         'Success metrics definition'
       ],
-      timeline: '4 Days',
-      price: '₹149',
       color: 'from-blue-500 to-blue-600',
       category: 'Strategy & Business Design'
     },
@@ -86,8 +77,6 @@ const Services: React.FC = () => {
         'Growth roadmap and milestones',
         'Pricing strategy optimization'
       ],
-      timeline: '3 Days',
-      price: '₹179',
       color: 'from-blue-500 to-blue-600',
       category: 'Strategy & Business Design'
     },
@@ -104,8 +93,6 @@ const Services: React.FC = () => {
         'Visual language and style guide',
         'Brand asset library'
       ],
-      timeline: '2-3 Days',
-      price: '₹139',
       color: 'from-purple-500 to-purple-600',
       category: 'Design & Branding'
     },
@@ -120,8 +107,6 @@ const Services: React.FC = () => {
         'Mobile-responsive design',
         'Conversion optimization'
       ],
-      timeline: '4 Days',
-      price: '₹349-499',
       color: 'from-purple-500 to-purple-600',
       category: 'Design & Branding'
     },
@@ -136,8 +121,6 @@ const Services: React.FC = () => {
         'Performance optimization',
         'SEO implementation'
       ],
-      timeline: '4 Days',
-      price: '₹349-499',
       color: 'from-purple-500 to-purple-600',
       category: 'Design & Branding'
     },
@@ -154,8 +137,6 @@ const Services: React.FC = () => {
         'User authentication and security',
         'Deployment and hosting setup'
       ],
-      timeline: '7-10 Days',
-      price: '₹499-699',
       color: 'from-green-500 to-green-600',
       category: 'MVP Development & Prototyping'
     },
@@ -170,8 +151,6 @@ const Services: React.FC = () => {
         'Design system creation',
         'Prototype testing and iteration'
       ],
-      timeline: '7 Days',
-      price: '₹549-749',
       color: 'from-green-500 to-green-600',
       category: 'MVP Development & Prototyping'
     },
@@ -188,8 +167,6 @@ const Services: React.FC = () => {
         'Market opportunity presentation',
         'Team and traction showcase'
       ],
-      timeline: '4-5 Days',
-      price: '₹249-339',
       color: 'from-orange-500 to-orange-600',
       category: 'Fundraising & Investor Preparation'
     },
@@ -204,8 +181,6 @@ const Services: React.FC = () => {
         'Cash flow forecasting',
         'Investment requirement analysis'
       ],
-      timeline: '2 Days',
-      price: '₹149',
       color: 'from-orange-500 to-orange-600',
       category: 'Fundraising & Investor Preparation'
     },
@@ -222,8 +197,6 @@ const Services: React.FC = () => {
         'Industry insights and advice',
         'Action plan development'
       ],
-      timeline: '30 mins',
-      price: '₹79 per call',
       color: 'from-indigo-500 to-indigo-600',
       category: 'Mentorship & Incubation'
     },
@@ -238,8 +211,6 @@ const Services: React.FC = () => {
         'Pitch deck refinement and practice',
         'Investor introduction and networking'
       ],
-      timeline: '30 Days',
-      price: 'Based on project',
       color: 'from-indigo-500 to-indigo-600',
       category: 'Mentorship & Incubation'
     }
@@ -277,17 +248,6 @@ const Services: React.FC = () => {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-xl font-bold">{service.title}</h3>
-                          <div className="flex items-center justify-between mt-1">
-                            <div className="flex items-center space-x-2">
-                              <Clock size={14} className="text-orange-500" />
-                              <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                {service.timeline}
-                              </span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-lg font-bold text-orange-500">{service.price}</span>
-                            </div>
-                          </div>
                         </div>
                       </div>
                       
@@ -349,18 +309,6 @@ const Services: React.FC = () => {
                 <h2 className="text-2xl font-bold text-orange-500 text-center mb-2">{selectedService.title}</h2>
                 <p className={`text-center text-lg ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-4`}>{selectedService.description}</p>
                 
-                {/* Price and Timeline */}
-                <div className="w-full flex justify-between items-center bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg mb-4">
-                  <div className="flex items-center space-x-2">
-                    <Clock size={20} className="text-orange-500" />
-                    <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Timeline: {selectedService.timeline}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold text-orange-500">{selectedService.price}</span>
-                  </div>
-                </div>
                 
                 <div className="w-full mb-4">
                   <h4 className="font-semibold text-lg mb-2 text-orange-400">What's Included:</h4>
@@ -391,11 +339,9 @@ const Services: React.FC = () => {
                 &times;
               </button>
               <div className="flex flex-col items-center gap-4">
-                <img
-                  src="/images/founder-setu.JPG"
-                  alt="E Sai Eshwar"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-orange-500 shadow-lg"
-                />
+                <div className="w-24 h-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center border-4 border-orange-500 shadow-lg">
+                  <span className="text-white font-bold text-2xl">ES</span>
+                </div>
                 <h2 className="text-2xl font-bold text-orange-500 text-center mb-1">E Sai Eshwar</h2>
                 <p className="text-center text-lg text-gray-300 mb-1">Founder, Setu Studios</p>
                 <a href="mailto:saieshwar@example.com" className="text-orange-400 hover:underline mb-2">saieshwar@example.com</a>

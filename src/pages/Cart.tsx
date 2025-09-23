@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShoppingCart,
-  X,
   Plus,
   Minus,
   ArrowLeft,
@@ -9,28 +8,21 @@ import {
   Lock,
   CheckCircle,
   Trash2,
-  Heart,
-  Eye
+  Heart
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useCart } from '../contexts/CartContext';
+import { useNotification } from '../contexts/NotificationContext';
 import { useNavigate } from 'react-router-dom';
+import { createOrder, generateSessionId } from '../services/orders';
+import { sendCustomerConfirmationEmail, sendAdminNotificationEmail, OrderEmailData } from '../services/email';
 import AnimatedCard from '../components/AnimatedCard';
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  type: 'individual' | 'combo';
-  description: string;
-  timeline: string;
-  category: string;
-}
 
 const Cart: React.FC = () => {
   const { isDark } = useTheme();
+  const { cartItems, updateQuantity, removeFromCart, clearCart, getTotal, getItemCount } = useCart();
+  const { showNotification } = useNotification();
   const navigate = useNavigate();
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [checkoutForm, setCheckoutForm] = useState({
     name: '',
@@ -39,77 +31,17 @@ const Cart: React.FC = () => {
     company: '',
     projectDescription: ''
   });
+  const [createdOrder, setCreatedOrder] = useState<any>(null);
 
-  // Load cart from localStorage on component mount
-  useEffect(() => {
-    const loadCart = () => {
-      const savedCart = localStorage.getItem('setu-cart');
-      
-      if (savedCart && savedCart !== 'null' && savedCart !== 'undefined') {
-        try {
-          const parsedCart = JSON.parse(savedCart);
-          
-          if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-            setCart(parsedCart);
-          } else {
-            setCart([]);
-          }
-        } catch (error) {
-          console.error('Error parsing cart:', error);
-          setCart([]);
-        }
-      } else {
-        setCart([]);
-      }
-    };
+  // No need to update form from user profile since we removed authentication
 
-    loadCart();
-    
-    // Also listen for storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'setu-cart') {
-        loadCart();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('setu-cart', JSON.stringify(cart));
-  }, [cart]);
-
-  const updateQuantity = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(itemId);
-      return;
-    }
-    setCart(prev => prev.map(item => 
-      item.id === itemId ? { ...item, quantity } : item
-    ));
-  };
-
-  const removeFromCart = (itemId: string) => {
-    setCart(prev => prev.filter(item => item.id !== itemId));
-  };
-
-  const moveToWishlist = (item: CartItem) => {
+  const moveToWishlist = (item: any) => {
     // Add to wishlist (you can implement wishlist functionality later)
     removeFromCart(item.id);
   };
 
-  const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-
-  const getCartCount = () => {
-    return cart.reduce((count, item) => count + item.quantity, 0);
-  };
-
   const getSubtotal = () => {
-    return getCartTotal();
+    return getTotal();
   };
 
   const getDiscount = () => {
@@ -117,7 +49,7 @@ const Cart: React.FC = () => {
     return 0;
   };
 
-  const getTotal = () => {
+  const getFinalTotal = () => {
     return getSubtotal() - getDiscount();
   };
 
@@ -125,14 +57,64 @@ const Cart: React.FC = () => {
     setCheckoutForm({ ...checkoutForm, [e.target.name]: e.target.value });
   };
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCheckoutStep('success');
-    // Clear cart after successful checkout
-    setTimeout(() => {
-      setCart([]);
-      localStorage.removeItem('setu-cart');
-    }, 3000);
+    
+    try {
+      // Generate a session ID for this order
+      const sessionId = generateSessionId();
+      
+      // Prepare order data
+      const orderData = {
+        sessionId,
+        customerName: checkoutForm.name,
+        customerEmail: checkoutForm.email,
+        customerPhone: checkoutForm.phone,
+        customerCompany: checkoutForm.company,
+        items: cartItems.map(item => item.name),
+        total: getTotal(),
+        projectDescription: checkoutForm.projectDescription
+      };
+      
+      // Save order to Supabase
+      const order = await createOrder(orderData);
+      setCreatedOrder(order);
+      
+      // Prepare email data
+      const emailData: OrderEmailData = {
+        customerName: checkoutForm.name,
+        customerEmail: checkoutForm.email,
+        customerPhone: checkoutForm.phone,
+        customerCompany: checkoutForm.company,
+        items: cartItems.map(item => item.name),
+        total: getTotal(),
+        projectDescription: checkoutForm.projectDescription,
+        orderId: order.id,
+        orderDate: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      };
+      
+      // Send emails (don't wait for them to complete)
+      sendCustomerConfirmationEmail(emailData);
+      sendAdminNotificationEmail(emailData);
+      
+      // Save session ID and email to localStorage for future reference
+      localStorage.setItem('setu-session-id', sessionId);
+      localStorage.setItem('setu-customer-email', checkoutForm.email);
+      
+      // Clear cart
+      await clearCart();
+      
+      setCheckoutStep('success');
+      showNotification('Order placed successfully! Confirmation email sent.', 'success');
+    } catch (error) {
+      showNotification('Failed to place order. Please try again.', 'error');
+    }
   };
 
   const continueShopping = () => {
@@ -149,19 +131,32 @@ const Cart: React.FC = () => {
                 <CheckCircle size={48} className="text-green-500" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-green-500 mb-4">Order Confirmed!</h1>
-            <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-              Thank you for your order. We've received your request and will get started on your project right away.
-            </p>
-            <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-lg mb-8">
-              <h3 className="font-semibold text-orange-600 mb-2">What's Next?</h3>
-              <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                <li>• You'll receive a confirmation email within 24 hours</li>
-                <li>• Our team will contact you to discuss project details</li>
-                <li>• We'll begin work according to the timeline specified</li>
-                <li>• Regular updates will be provided throughout the process</li>
-              </ul>
-            </div>
+             <h1 className="text-3xl font-bold text-green-500 mb-4">Order Confirmed!</h1>
+             <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+               Thank you for your order. We've received your request and will get started on your project right away.
+             </p>
+             
+             {createdOrder && (
+               <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg mb-8">
+                 <h3 className="font-semibold text-blue-600 mb-2">Order Details</h3>
+                 <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                   Order ID: <span className="font-mono font-bold">#{createdOrder.id.slice(0, 8)}</span>
+                 </p>
+                 <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                   Confirmation email sent to: <span className="font-semibold">{checkoutForm.email}</span>
+                 </p>
+               </div>
+             )}
+             
+             <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-lg mb-8">
+               <h3 className="font-semibold text-orange-600 mb-2">What's Next?</h3>
+               <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                 <li>✅ Confirmation email sent to your inbox</li>
+                 <li>📧 Our team will contact you within 24 hours</li>
+                 <li>🚀 We'll begin work according to the timeline specified</li>
+                 <li>📞 Regular updates will be provided throughout the process</li>
+               </ul>
+             </div>
             <button
               onClick={() => navigate('/')}
               className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
@@ -194,90 +189,93 @@ const Cart: React.FC = () => {
             <AnimatedCard className="p-6">
               <h2 className="text-2xl font-bold mb-6">Checkout Information</h2>
               <form onSubmit={handleCheckout} className="space-y-4">
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={checkoutForm.name}
-                    onChange={handleCheckoutFormChange}
-                    required
-                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                      isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
-                    }`}
-                  />
-                </div>
+                 <div>
+                   <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                     Full Name <span className="text-red-500">*</span>
+                   </label>
+                   <input
+                     type="text"
+                     name="name"
+                     value={checkoutForm.name}
+                     onChange={handleCheckoutFormChange}
+                     required
+                     className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                       isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
+                     }`}
+                   />
+                 </div>
 
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={checkoutForm.email}
-                    onChange={handleCheckoutFormChange}
-                    required
-                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                      isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
-                    }`}
-                  />
-                </div>
+                 <div>
+                   <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                     Email Address <span className="text-red-500">*</span>
+                   </label>
+                   <input
+                     type="email"
+                     name="email"
+                     value={checkoutForm.email}
+                     onChange={handleCheckoutFormChange}
+                     required
+                     className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                       isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
+                     }`}
+                   />
+                 </div>
 
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={checkoutForm.phone}
-                    onChange={handleCheckoutFormChange}
-                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                      isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
-                    }`}
-                  />
-                </div>
+                 <div>
+                   <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                     Phone Number <span className="text-red-500">*</span>
+                   </label>
+                   <input
+                     type="tel"
+                     name="phone"
+                     value={checkoutForm.phone}
+                     onChange={handleCheckoutFormChange}
+                     required
+                     className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                       isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
+                     }`}
+                   />
+                 </div>
 
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    name="company"
-                    value={checkoutForm.company}
-                    onChange={handleCheckoutFormChange}
-                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                      isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
-                    }`}
-                  />
-                </div>
+                 <div>
+                   <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                     Company Name <span className="text-red-500">*</span>
+                   </label>
+                   <input
+                     type="text"
+                     name="company"
+                     value={checkoutForm.company}
+                     onChange={handleCheckoutFormChange}
+                     required
+                     className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                       isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
+                     }`}
+                   />
+                 </div>
 
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Project Description
-                  </label>
-                  <textarea
-                    name="projectDescription"
-                    value={checkoutForm.projectDescription}
-                    onChange={handleCheckoutFormChange}
-                    rows={4}
-                    placeholder="Tell us about your project idea, goals, and any specific requirements..."
-                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                      isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
-                    }`}
-                  />
-                </div>
+                 <div>
+                   <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                     Project Description <span className="text-red-500">*</span>
+                   </label>
+                   <textarea
+                     name="projectDescription"
+                     value={checkoutForm.projectDescription}
+                     onChange={handleCheckoutFormChange}
+                     rows={4}
+                     required
+                     placeholder="Tell us about your project idea, goals, and any specific requirements..."
+                     className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
+                       isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
+                     }`}
+                   />
+                 </div>
 
                 <button
                   type="submit"
                   className="w-full bg-orange-500 text-white py-4 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2"
                 >
                   <Lock size={20} />
-                  <span>Complete Order - ₹{getTotal()}</span>
+                  <span>Complete Order - ₹{getFinalTotal()}</span>
                 </button>
               </form>
             </AnimatedCard>
@@ -287,7 +285,7 @@ const Cart: React.FC = () => {
               <AnimatedCard className="p-6">
                 <h3 className="text-xl font-bold mb-4">Order Summary</h3>
                 <div className="space-y-3">
-                  {cart.map((item) => (
+                  {cartItems.map((item) => (
                     <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-slate-700">
                       <div className="flex-1">
                         <h4 className="font-medium">{item.name}</h4>
@@ -344,7 +342,7 @@ const Cart: React.FC = () => {
             <ShoppingCart size={32} className="text-orange-500" />
             <h1 className="text-3xl font-bold">Shopping Cart</h1>
             <span className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              ({getCartCount()} items)
+              ({getItemCount()} items)
             </span>
           </div>
           <div className="flex items-center space-x-4">
@@ -358,7 +356,7 @@ const Cart: React.FC = () => {
           </div>
         </div>
 
-        {cart.length === 0 && !localStorage.getItem('setu-cart') ? (
+        {cartItems.length === 0 ? (
           <AnimatedCard className="text-center p-12">
             <ShoppingCart size={64} className="mx-auto text-gray-400 mb-6" />
             <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
@@ -381,7 +379,7 @@ const Cart: React.FC = () => {
             
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {cart.map((item) => (
+              {cartItems.map((item) => (
                 <AnimatedCard key={item.id} className="p-6">
                   <div className="flex items-start space-x-4">
                     {/* Item Icon */}
@@ -409,22 +407,12 @@ const Cart: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Quantity Controls */}
+                      {/* Action Controls */}
                       <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center space-x-3">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                          >
-                            <Minus size={16} />
-                          </button>
-                          <span className="w-12 text-center font-semibold">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                          >
-                            <Plus size={16} />
-                          </button>
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                            Quantity: {item.quantity}
+                          </span>
                         </div>
 
                         <div className="flex items-center space-x-2">
@@ -465,7 +453,7 @@ const Cart: React.FC = () => {
               <AnimatedCard className="p-6">
                 <h3 className="text-xl font-bold mb-4">Order Summary</h3>
                 <div className="space-y-3">
-                  {cart.map((item) => (
+                  {cartItems.map((item) => (
                     <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-slate-700">
                       <div className="flex-1">
                         <h4 className="font-medium">{item.name}</h4>

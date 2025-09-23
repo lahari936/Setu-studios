@@ -2,38 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Menu, X, ArrowUp, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useCart } from '../contexts/CartContext';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isDark, toggleTheme } = useTheme();
+  const { getItemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
 
-  // Get cart count from localStorage
-  useEffect(() => {
-    const updateCartCount = () => {
-      const savedCart = localStorage.getItem('setu-cart');
-      if (savedCart) {
-        const cart = JSON.parse(savedCart);
-        const count = cart.reduce((total: number, item: any) => total + item.quantity, 0);
-        setCartCount(count);
-      } else {
-        setCartCount(0);
-      }
-    };
-
-    updateCartCount();
-    // Listen for storage changes (when cart is updated from other components)
-    window.addEventListener('storage', updateCartCount);
-    // Also check periodically
-    const interval = setInterval(updateCartCount, 1000);
-
-    return () => {
-      window.removeEventListener('storage', updateCartCount);
-      clearInterval(interval);
-    };
-  }, []);
+  const cartCount = getItemCount();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,7 +31,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Services', path: '/services' },
     { name: 'Packages', path: '/packages' },
     { name: 'AI Analyzer', path: '/idea-analyzer' },
-    { name: 'Profile', path: '/profile' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -189,69 +166,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <footer className={`border-t ${
         isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* About */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">About Setu Studios</h3>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Your bridge from idea to launch. AI-powered insights combined with hands-on execution for modern startups.
-              </p>
-            </div>
-
-            {/* Services */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Services</h3>
-              <div className="space-y-2">
-                {['Strategy & Business Design', 'Design & Branding', 'MVP Development', 'Fundraising Support'].map((service) => (
-                  <p key={service} className={`text-sm hover:text-orange-500 cursor-pointer transition-colors ${
-                    isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    {service}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            {/* Contact */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Contact</h3>
-              <div className="space-y-2">
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  hello@setustudios.com
-                </p>
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  +1 (555) 123-4567
-                </p>
-              </div>
-            </div>
-
-            {/* Social */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Follow Us</h3>
-              <div className="flex space-x-4">
-                {['LinkedIn', 'X', 'YouTube'].map((social) => (
-                  <a
-                    key={social}
-                    href="#"
-                    className={`text-sm hover:text-orange-500 transition-colors ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}
-                  >
-                    {social}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className={`mt-8 pt-8 border-t ${
-            isDark ? 'border-slate-800' : 'border-slate-200'
-          } text-center`}>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              © 2025 Setu Studios. All rights reserved.
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            © 2025 Setu Studios. All rights reserved.
+          </p>
         </div>
       </footer>
 

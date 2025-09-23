@@ -6,13 +6,15 @@ interface AnimatedCardProps {
   className?: string;
   hoverScale?: boolean;
   glowOnHover?: boolean;
+  onClick?: () => void;
 }
 
 const AnimatedCard: React.FC<AnimatedCardProps> = ({ 
   children, 
   className = '', 
   hoverScale = true, 
-  glowOnHover = true 
+  glowOnHover = true,
+  onClick
 }) => {
   const { isDark } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
@@ -29,6 +31,7 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={onClick}
     >
       {children}
     </div>
