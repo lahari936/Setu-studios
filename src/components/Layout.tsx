@@ -30,7 +30,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Home', path: '/' },
     { name: 'Services', path: '/services' },
     { name: 'Packages', path: '/packages' },
-    { name: 'AI Analyzer', path: '/idea-analyzer' },
+    { name: 'Idea Analyzer', path: '/idea-analyzer' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -51,7 +51,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Link to="/" className="flex items-center space-x-3 group">
                <div className="w-10 h-10 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
                  <img 
-                   src="/logo.jpg" 
+                   src="public/logo.jpg" 
                    alt="Setu Studios Logo" 
                    className="w-full h-full object-cover scale-150"
                  />

@@ -337,7 +337,7 @@ ${analysisData.elevator_pitch_1_minute.closing}
           <div className="inline-flex p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
             <Brain size={24} className="text-white" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">AI Idea Analyzer</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">Idea Analyzer</h1>
           <p className={`text-lg max-w-2xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
             Get AI-powered insights on your startup idea with comprehensive market analysis, validation, and strategic recommendations.
           </p>

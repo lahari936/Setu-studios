@@ -70,7 +70,7 @@ export default function Home() {
 
       {/* Buttons */}
       <motion.div
-        className="flex justify-center gap-6 mt-8"
+        className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-8"
         variants={fadeInAndStay}
         initial="hidden"
         animate="visible"
@@ -95,14 +95,9 @@ export default function Home() {
             boxShadow: "0 0 12px #ff6600, 0 0 24px #ff6600",
           }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            const aboutSection = document.getElementById('about');
-            if (aboutSection) {
-              aboutSection.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}
+          onClick={() => navigate('/idea-analyzer')}
         >
-          Learn More
+          Analyze Your Idea
         </motion.button>
       </motion.div>
 
