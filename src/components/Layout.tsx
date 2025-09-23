@@ -48,10 +48,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
-              </div>
+            <Link to="/" className="flex items-center space-x-3 group">
+               <div className="w-10 h-10 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
+                 <img 
+                   src="/logo.jpg" 
+                   alt="Setu Studios Logo" 
+                   className="w-full h-full object-cover scale-150"
+                 />
+               </div>
               <span className="text-xl font-bold group-hover:text-orange-500 transition-colors">
                 Setu Studios
               </span>
