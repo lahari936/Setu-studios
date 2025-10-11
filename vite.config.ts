@@ -8,10 +8,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5000,
     strictPort: true,
-    hmr: {
-      host: '0.0.0.0',
-      port: 5000,
-    },
+    allowedHosts: true,
   },
   build: {
     chunkSizeWarningLimit: 1000,
