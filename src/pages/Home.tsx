@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { motion, Variants } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -99,6 +98,38 @@ export default function Home() {
         >
           Analyze Your Idea
         </motion.button>
+      </motion.div>
+
+      {/* New Features Section */}
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12 w-full max-w-4xl"
+        variants={fadeInAndStay}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.button
+          className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl hover:border-orange-500 transition-all duration-300 text-center"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/mentorship')}
+        >
+          <h3 className="text-orange-500 font-bold text-lg mb-2">Find Mentors</h3>
+          <p className="text-gray-400 text-sm">Connect with industry experts</p>
+        </motion.button>
+        <motion.button
+          className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl hover:border-orange-500 transition-all duration-300 text-center"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/blog')}
+        >
+          <h3 className="text-orange-500 font-bold text-lg mb-2">Read Stories</h3>
+          <p className="text-gray-400 text-sm">Learn from real founders</p>
+        </motion.button>
+        <div className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl transition-all duration-300 text-center">
+          <h3 className="text-orange-500 font-bold text-lg mb-2">AI Assistant</h3>
+          <p className="text-gray-400 text-sm">Chat with your co-founder AI</p>
+          <p className="text-orange-500/60 text-xs mt-2">👉 Check bottom-right corner</p>
+        </div>
       </motion.div>
 
       {/* About Section */}

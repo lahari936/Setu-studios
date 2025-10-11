@@ -20,7 +20,9 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotification } from '../contexts/NotificationContext';
 import AnimatedCard from '../components/AnimatedCard';
+import EnquiryModal from '../components/EnquiryModal';
 import { analyzeStartupIdea, StartupAnalysis } from '../services/gemini';
+import html2pdf from 'html2pdf.js';
 
 const IdeaAnalyzer: React.FC = () => {
   const { isDark } = useTheme();
@@ -32,6 +34,7 @@ const IdeaAnalyzer: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [analysisData, setAnalysisData] = useState<StartupAnalysis | null>(null);
+  const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -92,241 +95,26 @@ ${analysisData.elevator_pitch_1_minute.closing}`;
 
   const downloadReport = () => {
     if (!analysisData) return;
-    
-    const reportContent = `
-# 🚀 COMPREHENSIVE STARTUP ANALYSIS REPORT
-## ${formData.ideaName}
 
-**Generated on:** ${new Date().toLocaleDateString()}
-**Analysis by:** StartupBuilderGPT AI
-
----
-
-## 📋 EXECUTIVE SUMMARY
-
-### Overview
-${analysisData.executive_summary.overview}
-
-### Vision
-${analysisData.executive_summary.vision}
-
-### Mission
-${analysisData.executive_summary.mission}
-
----
-
-## 🎯 PROBLEM STATEMENT
-
-### Core Problem
-${analysisData.problem_statement.one_line}
-
-### Why It Matters
-${analysisData.problem_statement.why_it_matters}
-
----
-
-## 💡 SOLUTION
-
-### Solution Description
-${analysisData.solution.one_line}
-
-### How It Works
-${analysisData.solution.how_it_works.map((step, i) => `${i + 1}. ${step}`).join('\n')}
-
-### Key Benefits
-${analysisData.solution.benefits.map((benefit, _) => `• ${benefit}`).join('\n')}
-
----
-
-## ⭐ UNIQUE SELLING PROPOSITION
-
-### Main Differentiator
-${analysisData.unique_selling_proposition.one_line}
-
-### Key Differentiators
-${analysisData.unique_selling_proposition.key_differentiators.map((diff, _) => `• ${diff}`).join('\n')}
-
----
-
-## 📊 MARKET ANALYSIS
-
-### Target Customer
-**Segment:** ${analysisData.market_analysis.target_customer.segment}
-**Persona:** ${analysisData.market_analysis.target_customer.persona}
-
-### Market Size (TAM/SAM/SOM)
-- **TAM (Total Addressable Market):** ${analysisData.market_analysis.market_size_tam_sam_som.TAM}
-- **SAM (Serviceable Available Market):** ${analysisData.market_analysis.market_size_tam_sam_som.SAM}
-- **SOM (Serviceable Obtainable Market):** ${analysisData.market_analysis.market_size_tam_sam_som.SOM}
-
-### Market Trends
-${analysisData.market_analysis.trends.map((trend, _) => `• ${trend}`).join('\n')}
-
-### Competitors Analysis
-${analysisData.market_analysis.competitors.map((competitor, _) => 
-  `**${competitor.name}**
-  - Strengths: ${competitor.strength}
-  - Weaknesses: ${competitor.weakness}
-`).join('\n')}
-
----
-
-## 💼 BUSINESS MODEL
-
-### Revenue Streams
-${analysisData.business_model.revenue_streams.map((stream, _) => `• ${stream}`).join('\n')}
-
-### Pricing Strategy
-${analysisData.business_model.pricing_strategy}
-
-### Key Partnerships
-${analysisData.business_model.key_partnerships.map((partnership, _) => `• ${partnership}`).join('\n')}
-
----
-
-## 🚀 GO-TO-MARKET STRATEGY
-
-### Launch Plan
-${analysisData.go_to_market_strategy.launch_plan}
-
-### Distribution Channels
-${analysisData.go_to_market_strategy.distribution_channels.map((channel, _) => `• ${channel}`).join('\n')}
-
-### Early Adopter Strategy
-${analysisData.go_to_market_strategy.early_adopter_strategy}
-
----
-
-## 📈 GROWTH STRATEGY
-
-### Initial Traction Plan
-${analysisData.growth_strategy.initial_traction_plan}
-
-### Scaling Plan
-${analysisData.growth_strategy.scaling_plan}
-
-### Retention Plan
-${analysisData.growth_strategy.retention_plan}
-
----
-
-## 💰 FINANCE & FUNDING
-
-### Startup Cost Estimate
-${analysisData.finance.startup_cost_estimate}
-
-### Monetization Plan
-${analysisData.finance.monetization_plan}
-
-### Funding Stage & Ask
-- **Stage:** ${analysisData.finance.funding_stage_and_ask.stage}
-- **Amount:** ${analysisData.finance.funding_stage_and_ask.amount}
-- **Use of Funds:**
-${analysisData.finance.funding_stage_and_ask.use_of_funds.map((use, _) => `  • ${use}`).join('\n')}
-
----
-
-## 🔍 SWOT ANALYSIS
-
-### Strengths
-${analysisData.swot_analysis.strengths.map((strength, _) => `• ${strength}`).join('\n')}
-
-### Weaknesses
-${analysisData.swot_analysis.weaknesses.map((weakness, _) => `• ${weakness}`).join('\n')}
-
-### Opportunities
-${analysisData.swot_analysis.opportunities.map((opportunity, _) => `• ${opportunity}`).join('\n')}
-
-### Threats
-${analysisData.swot_analysis.threats.map((threat, _) => `• ${threat}`).join('\n')}
-
----
-
-## 🎯 4Ps MARKETING MIX
-
-### Product
-${analysisData["4ps_marketing_mix"].product}
-
-### Price
-${analysisData["4ps_marketing_mix"].price}
-
-### Place
-${analysisData["4ps_marketing_mix"].place}
-
-### Promotion
-${analysisData["4ps_marketing_mix"].promotion}
-
----
-
-## 📱 CONTENT PLAN (5 Days)
-
-${analysisData.content_plan_5_days.map(day => 
-  `### Day ${day.day}: ${day.theme}
-**Post Example:** ${day.post_example}
-`).join('\n')}
-
----
-
-## 🎤 PITCH DECK OUTLINE (7 Slides)
-
-${analysisData.pitch_deck_outline_7_slides.map(slide => 
-  `### Slide ${slide.slide}: ${slide.title}
-${slide.points.map((point, _) => `• ${point}`).join('\n')}
-`).join('\n')}
-
----
-
-## 🎯 ELEVATOR PITCH (1 Minute)
-
-### Hook
-${analysisData.elevator_pitch_1_minute.hook}
-
-### Problem
-${analysisData.elevator_pitch_1_minute.problem}
-
-### Solution
-${analysisData.elevator_pitch_1_minute.solution}
-
-### Market
-${analysisData.elevator_pitch_1_minute.market}
-
-### Traction/Potential
-${analysisData.elevator_pitch_1_minute.traction_or_potential}
-
-### Closing
-${analysisData.elevator_pitch_1_minute.closing}
-
----
-
-## 📞 NEXT STEPS
-
-1. **Review this comprehensive analysis**
-2. **Prioritize key action items based on your resources**
-3. **Develop detailed implementation plans for critical sections**
-4. **Create your pitch deck using the provided outline**
-5. **Start executing your go-to-market strategy**
-6. **Track progress against the growth strategy milestones**
-
----
-
-*This report was generated by StartupBuilderGPT AI - Your comprehensive startup strategy partner.*
-
-**Report ID:** ${Date.now()}
-**Idea:** ${formData.ideaName}
-**Description:** ${formData.ideaDescription}
-    `.trim();
-    
-    const blob = new Blob([reportContent], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `comprehensive-startup-analysis-${formData.ideaName.replace(/\s+/g, '-').toLowerCase()}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showNotification('Comprehensive report downloaded successfully!', 'success');
+    const element = document.getElementById('analysis-report');
+    if (!element) {
+      showNotification('Unable to generate PDF. Please try again.', 'error');
+      return;
+    }
+
+    const opt = {
+      margin: 10,
+      filename: `${formData.ideaName.replace(/\s+/g, '_')}_Analysis_Report.pdf`,
+      image: { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      showNotification('PDF report downloaded successfully!', 'success');
+    }).catch(() => {
+      showNotification('Failed to generate PDF. Please try again.', 'error');
+    });
   };
 
   return (
@@ -438,7 +226,7 @@ ${analysisData.elevator_pitch_1_minute.closing}
         ) : (
           /* Results Section */
           analysisData && (
-          <div className="space-y-8">
+          <div id="analysis-report" className="space-y-8">
             {/* Header */}
             <AnimatedCard className="text-center">
               <div className="flex items-center justify-center space-x-4 mb-4">
@@ -1213,11 +1001,11 @@ ${analysisData.elevator_pitch_1_minute.closing}
               </button>
                     
               <button 
-                onClick={() => {}}
+                onClick={() => setEnquiryModalOpen(true)}
                       className="group/btn relative px-12 py-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm text-white rounded-2xl font-bold hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center justify-center space-x-4 border border-blue-500/30"
               >
                       <Calendar size={28} className="relative z-10" />
-                      <span className="relative z-10 text-xl">Book Strategy Call</span>
+                      <span className="relative z-10 text-xl">Execute with Us</span>
               </button>
                     
               <button 
@@ -1261,6 +1049,14 @@ ${analysisData.elevator_pitch_1_minute.closing}
           )
         )}
       </div>
+
+      {/* Enquiry Modal */}
+      <EnquiryModal
+        isOpen={enquiryModalOpen}
+        onClose={() => setEnquiryModalOpen(false)}
+        title="Execute Your Idea with Us"
+        message={`Ready to turn ${formData.ideaName || 'your idea'} into reality? Let's discuss how we can help you build, launch, and scale your startup!`}
+      />
     </div>
   );
 };

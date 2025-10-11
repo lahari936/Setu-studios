@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Menu, X, ArrowUp, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
+import AIChatbot from './AIChatbot';
 import logoImage from '/logo.jpg';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -32,6 +33,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Services', path: '/services' },
     { name: 'Packages', path: '/packages' },
     { name: 'Idea Analyzer', path: '/idea-analyzer' },
+    { name: 'Mentorship', path: '/mentorship' },
+    { name: 'Blog', path: '/blog' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -182,11 +185,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 hover:scale-110 z-40"
+          className="fixed bottom-8 left-8 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 hover:scale-110 z-40"
         >
           <ArrowUp size={20} />
         </button>
       )}
+
+      {/* AI Chatbot */}
+      <AIChatbot />
     </div>
   );
 };

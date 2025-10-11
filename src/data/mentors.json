@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "name": "Dr. Ananya Sharma",
+    "domain": "AI & Machine Learning",
+    "expertise": "Deep Learning, NLP, Computer Vision",
+    "photo": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
+    "experience": "15+ years",
+    "company": "AI Innovations Lab"
+  },
+  {
+    "id": 2,
+    "name": "Rajesh Patel",
+    "domain": "Product Management",
+    "expertise": "Product Strategy, User Research, Roadmapping",
+    "photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+    "experience": "12+ years",
+    "company": "Tech Unicorn Ventures"
+  },
+  {
+    "id": 3,
+    "name": "Priya Menon",
+    "domain": "Fundraising & VC",
+    "expertise": "Venture Capital, Pitch Deck, Term Sheets",
+    "photo": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
+    "experience": "10+ years",
+    "company": "Summit Capital Partners"
+  },
+  {
+    "id": 4,
+    "name": "Vikram Singh",
+    "domain": "Marketing & Growth",
+    "expertise": "Growth Hacking, Digital Marketing, SEO/SEM",
+    "photo": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop",
+    "experience": "8+ years",
+    "company": "GrowthX Agency"
+  },
+  {
+    "id": 5,
+    "name": "Sneha Gupta",
+    "domain": "UI/UX Design",
+    "expertise": "User Experience, Interface Design, Prototyping",
+    "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    "experience": "9+ years",
+    "company": "Design Studios Inc"
+  },
+  {
+    "id": 6,
+    "name": "Arjun Reddy",
+    "domain": "Technology & Engineering",
+    "expertise": "Software Architecture, Cloud, DevOps",
+    "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    "experience": "14+ years",
+    "company": "CloudTech Solutions"
+  },
+  {
+    "id": 7,
+    "name": "Meera Krishnan",
+    "domain": "Legal & Compliance",
+    "expertise": "Startup Law, IP Protection, Contracts",
+    "photo": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=400&fit=crop",
+    "experience": "11+ years",
+    "company": "LegalTech Partners"
+  },
+  {
+    "id": 8,
+    "name": "Karthik Iyer",
+    "domain": "Sales & Business Development",
+    "expertise": "B2B Sales, Partnerships, Revenue Growth",
+    "photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop",
+    "experience": "10+ years",
+    "company": "SalesForce Dynamics"
+  },
+  {
+    "id": 9,
+    "name": "Divya Nair",
+    "domain": "Finance & Operations",
+    "expertise": "Financial Planning, Unit Economics, Operations",
+    "photo": "https://images.unsplash.com/photo-1573496774426-fe5b58e5e9c0?w=400&h=400&fit=crop",
+    "experience": "13+ years",
+    "company": "FinOps Consulting"
+  }
+]
