@@ -1,0 +1,79 @@
+🧩 Required Feature Additions
+1️⃣ Mentorship Marketplace Page
+
+Create /src/pages/Mentorship.tsx
+
+Keep existing navbar, footer, and theme consistent.
+
+Display mentor cards (photo, name, domain, expertise, “Connect” button).
+
+On clicking Connect, open the existing enquiry form component (reuse from site).
+
+Use local data (mentors.json or static array) — no backend changes.
+
+2️⃣ Blog Page
+
+Create /src/pages/Blog.tsx
+
+Two sections:
+
+Startup Stories — static Markdown or hardcoded sample posts.
+
+Startup News — fetch dynamically using https://newsapi.org/ (6 latest startup articles).
+
+Responsive grid layout, matching site style.
+
+3️⃣ AI Analyser Enhancement
+
+In the AI Idea Analyser page/component:
+
+Add a “Execute with Us” button below the generated report.
+
+On click → open existing enquiry form.
+
+Add Download Report (PDF) button → use html2pdf.js to export report section.
+
+4️⃣ AI Co-Founder Assistant (Chatbot)
+
+Add a chatbot icon (bottom-right) that stays visible on all pages.
+
+Opens a small popup chat window titled AI Co-Founder Assistant.
+
+Integrate a basic LLM API (like HuggingFace or OpenAssistant) for text suggestions.
+
+Minimal, non-intrusive design matching theme.
+
+Fully frontend-side implementation.
+
+5️⃣ Homepage (Optional)
+
+Add small navigation links or CTAs to new features (Mentorship, Blog, AI Assistant).
+
+Do not change hero section, fonts, or colors — just link buttons subtly.
+
+🔒 Rules
+
+Do not alter any backend or API endpoints.
+
+Do not modify or remove existing frontend elements or pages.
+
+Do all work locally in your cloned repo, then push to
+👉 https://github.com/lahari396/Setu-studios
+
+Test with npm run dev before every push.
+
+🧾 Deliverables Summary
+
+After completion, provide:
+
+File list of all new/modified files
+
+Short commit messages (example below):
+
+feat: added mentorship marketplace page
+feat: integrated startup blog with News API
+feat: added AI co-founder assistant chatbot
+feat: added report PDF export for AI analyser
+
+
+A short summary of new components created and their file paths.
