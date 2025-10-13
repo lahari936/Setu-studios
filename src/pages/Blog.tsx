@@ -20,6 +20,8 @@ interface StartupStory {
   date: string;
   readTime: string;
   category: string;
+  image?: string;
+  content?: string;
 }
 
 const startupStories: StartupStory[] = [
@@ -84,6 +86,7 @@ const Blog: React.FC = () => {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [newsError, setNewsError] = useState<string | null>(null);
+  const [submittedStories, setSubmittedStories] = useState<Array<Partial<StartupStory> & { image?: string; content?: string }>>([]);
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -165,6 +168,13 @@ const Blog: React.FC = () => {
     };
 
     fetchNews();
+    // load submitted stories from localStorage
+    try {
+      const stored = JSON.parse(localStorage.getItem('submitted_stories') || '[]');
+      setSubmittedStories(stored || []);
+    } catch {
+      setSubmittedStories([]);
+    }
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -201,29 +211,32 @@ const Blog: React.FC = () => {
             <h2 className="text-3xl font-bold">Startup Stories</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {startupStories.map((story) => (
+            {[...submittedStories, ...startupStories].map((story) => (
               <AnimatedCard key={story.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-xs font-semibold">
-                      {story.category}
-                    </span>
+                    {story.category && (
+                      <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-xs font-semibold">
+                        {story.category}
+                      </span>
+                    )}
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-orange-500 line-clamp-2">
-                    {story.title}
-                  </h3>
-                  <p className={`text-sm mb-4 line-clamp-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {story.excerpt}
-                  </p>
+                  <h3 className="text-xl font-bold mb-3 text-orange-500 line-clamp-2">{story.title}</h3>
+                  {story.image && (
+                    <div className="w-full h-48 overflow-hidden mb-3 rounded">
+                      <img src={story.image} alt={story.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <p className={`text-sm mb-4 line-clamp-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{story.excerpt || story.content?.slice(0, 200)}</p>
                   <div className={`flex items-center justify-between text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     <div className="flex items-center gap-2">
                       <Calendar size={16} />
-                      <span>{formatDate(story.date)}</span>
+                      <span>{formatDate(story.date || new Date().toISOString())}</span>
                     </div>
-                    <span>{story.readTime}</span>
+                    <span>{story.readTime || '—'}</span>
                   </div>
                   <div className={`mt-3 pt-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <p className="text-sm font-medium">By {story.author}</p>
+                    <p className="text-sm font-medium">By {story.author || 'Contributor'}</p>
                   </div>
                 </div>
               </AnimatedCard>
@@ -305,7 +318,7 @@ const Blog: React.FC = () => {
             Reach out to us if you'd like to share your journey!
           </p>
           <a
-            href="mailto:guidebazaar2@gmail.com?subject=Share My Startup Story"
+            href="/submit-story"
             className="inline-block px-8 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
           >
             Submit Your Story

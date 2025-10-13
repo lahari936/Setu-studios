@@ -209,9 +209,47 @@ Rules:
 export const analyzeStartupIdea = async (ideaName: string, ideaDescription: string): Promise<StartupAnalysis> => {
   try {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
+
+    // If no API key is configured, return a deterministic mock analysis so the front-end works in dev.
     if (!apiKey) {
-      throw new Error('Gemini API key not configured');
+      console.warn('VITE_GEMINI_API_KEY not set — returning mocked analysis for development');
+      const mock: StartupAnalysis = {
+        executive_summary: {
+          overview: `A concise analysis for ${ideaName}: ${ideaDescription}`,
+          vision: `To build a strong product around ${ideaName}`,
+          mission: `Validate and launch ${ideaName} with early customers`,
+        },
+        problem_statement: {
+          one_line: `Core problem solved by ${ideaName}`,
+          why_it_matters: `This problem affects the target customers and needs attention.`
+        },
+        solution: {
+          one_line: `A straightforward solution for ${ideaName}`,
+          how_it_works: ['Define MVP', 'Validate with users', 'Iterate quickly'],
+          benefits: ['Faster validation', 'Lower costs']
+        },
+        unique_selling_proposition: {
+          one_line: `${ideaName} stands out by focusing on practical execution`,
+          key_differentiators: ['Execution-first approach', 'Founder-led insights']
+        },
+        market_analysis: {
+          target_customer: { segment: 'Early adopters', persona: 'Founders and PMs' },
+          market_size_tam_sam_som: { TAM: 'N/A', SAM: 'N/A', SOM: 'N/A' },
+          trends: ['AI adoption', 'No-code tools'],
+          competitors: [{ name: 'Competitor A', strength: 'Market presence', weakness: 'High cost' }]
+        },
+        business_model: { revenue_streams: ['Subscription'], pricing_strategy: 'Tiered', key_partnerships: [] },
+        go_to_market_strategy: { launch_plan: 'Build landing page and collect emails', distribution_channels: ['Social', 'Community'], early_adopter_strategy: 'Beta invites' },
+        growth_strategy: { initial_traction_plan: 'Content + partnerships', scaling_plan: 'Paid channels', retention_plan: 'Email onboarding' },
+        finance: { startup_cost_estimate: 'Estimate needed', monetization_plan: 'Subscription', funding_stage_and_ask: { stage: 'Pre-seed', amount: 'TBD', use_of_funds: [] } },
+        swot_analysis: { strengths: ['Focus'], weaknesses: ['Small team'], opportunities: ['Market gap'], threats: ['Competition'] },
+        "4ps_marketing_mix": { product: ideaName, price: 'Value-based', place: 'Online', promotion: 'Content marketing' },
+        content_plan_5_days: [ { day: 1, theme: 'Intro', post_example: 'Share the idea' } ],
+        pitch_deck_outline_7_slides: [ { slide: 1, title: 'Problem', points: ['Problem statement'] } ],
+        elevator_pitch_1_minute: { hook: `Introducing ${ideaName}`, problem: 'Problem', solution: 'Solution', market: 'Market', traction_or_potential: 'Potential', closing: 'Call to action' }
+      };
+
+      return Promise.resolve(mock);
     }
 
     const prompt = ANALYSIS_PROMPT
@@ -240,29 +278,57 @@ export const analyzeStartupIdea = async (ideaName: string, ideaDescription: stri
 
     if (!response.ok) {
       const errorData = await response.text();
+      console.error('Gemini API error response:', response.status, errorData);
       throw new Error(`API request failed: ${response.status} - ${errorData}`);
     }
 
     const data = await response.json();
-    
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      throw new Error('No text content in API response');
+
+    // The Gemini API may return text wrapped or with extra chars. Attempt a few tolerant parsing strategies.
+    const candidates = data?.candidates || data?.outputs || [];
+    let text: string | undefined;
+
+    // Try common shapes
+    if (Array.isArray(candidates) && candidates.length > 0) {
+      const first = candidates[0];
+      text = first?.content?.parts?.[0]?.text || first?.content?.[0]?.text || first?.text || first?.output;
     }
-    
-    // Clean the response to extract JSON
+
+    if (!text && typeof data === 'string') {
+      text = data as string;
+    }
+
+    if (!text) {
+      console.error('Gemini: Unable to find textual content in response', data);
+      throw new Error('No text content found in API response');
+    }
+
+    // Try to extract JSON object from the text (first {...} block)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('No valid JSON found in response');
+      // As a last resort, attempt to parse entire text as JSON
+      try {
+        const analysis = JSON.parse(text) as StartupAnalysis;
+        return analysis;
+      } catch (err) {
+        console.error('Gemini: Failed to parse JSON from text', { textSnippet: text.slice(0, 500), err });
+        throw new Error('No valid JSON found in response text');
+      }
     }
-    
+
     const jsonString = jsonMatch[0];
-    
-    const analysis = JSON.parse(jsonString) as StartupAnalysis;
-    
-    return analysis;
+
+    try {
+      const analysis = JSON.parse(jsonString) as StartupAnalysis;
+      return analysis;
+    } catch (err) {
+      console.error('Gemini: JSON.parse failed', { jsonStringSnippet: jsonString.slice(0, 500), err });
+      throw new Error('Failed to parse analysis JSON from API response');
+    }
   } catch (error) {
-    throw new Error(`Failed to analyze startup idea: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    console.error('analyzeStartupIdea error:', msg);
+    throw new Error(`Failed to analyze startup idea: ${msg}`);
   }
 };
 

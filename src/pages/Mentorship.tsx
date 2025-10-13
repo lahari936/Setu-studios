@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GraduationCap, Briefcase, Award, Users } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import AnimatedCard from '../components/AnimatedCard';
 import EnquiryModal from '../components/EnquiryModal';
 import mentorsData from '../data/mentors.json';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface Mentor {
   id: number;
@@ -13,16 +14,66 @@ interface Mentor {
   photo: string;
   experience: string;
   company: string;
+  verified?: boolean;
 }
 
 const Mentorship: React.FC = () => {
   const { isDark } = useTheme();
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
+  const { showNotification } = useNotification();
+
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [showUnverified, setShowUnverified] = useState(false);
+
+  // Form state for mentor submission
+  const [form, setForm] = useState({ name: '', designation: '', experience: '', sectors: '', bio: '', linkedin: '' });
 
   const handleConnect = (mentor: Mentor) => {
     setSelectedMentor(mentor);
     setEnquiryModalOpen(true);
+  };
+
+  useEffect(() => {
+    // Load mentors from localStorage first, fall back to bundled data
+    const stored = localStorage.getItem('mentors_local');
+    if (stored) {
+      try {
+        setMentors(JSON.parse(stored));
+      } catch {
+        setMentors(mentorsData as Mentor[]);
+      }
+    } else {
+      setMentors(mentorsData as Mentor[]);
+    }
+  }, []);
+
+  const persistMentors = (list: Mentor[]) => {
+    setMentors(list);
+    try {
+      localStorage.setItem('mentors_local', JSON.stringify(list));
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  const handleSubmitProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    const nextId = Math.max(0, ...mentors.map(m => m.id)) + 1;
+    const newMentor: Mentor = {
+      id: nextId,
+      name: form.name,
+      domain: form.designation,
+      expertise: form.sectors,
+      photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(form.name)}&background=f97316&color=fff`,
+      experience: form.experience,
+      company: '',
+      verified: false
+    };
+
+    persistMentors([newMentor, ...mentors]);
+    setForm({ name: '', designation: '', experience: '', sectors: '', bio: '', linkedin: '' });
+    showNotification('You will be appeared on screen after approving', 'success');
   };
 
   return (
@@ -76,8 +127,14 @@ const Mentorship: React.FC = () => {
         {/* Mentors Grid */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-8 text-center">Meet Our Mentors</h2>
+          <div className="flex items-center justify-center mb-6 gap-4">
+            <label className="text-sm flex items-center gap-2">
+              <input type="checkbox" checked={showUnverified} onChange={() => setShowUnverified(v => !v)} />
+              Show Unverified
+            </label>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mentorsData.map((mentor) => (
+            {mentors.filter(m => showUnverified ? true : m.verified).map((mentor) => (
               <AnimatedCard key={mentor.id} className="overflow-hidden">
                 <div className="p-6">
                   <div className="flex flex-col items-center text-center">
@@ -92,6 +149,9 @@ const Mentorship: React.FC = () => {
                       />
                     </div>
                     <h3 className="text-xl font-bold mb-2 text-orange-500">{mentor.name}</h3>
+                    {!mentor.verified && (
+                      <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full mb-2">Unverified</span>
+                    )}
                     <p className={`text-sm font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       {mentor.domain}
                     </p>
@@ -117,6 +177,28 @@ const Mentorship: React.FC = () => {
               </AnimatedCard>
             ))}
           </div>
+        </div>
+
+        {/* Create Mentor Profile Section */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-6 text-center">Create Your Mentor Profile</h2>
+          <AnimatedCard className="max-w-3xl mx-auto p-6">
+            <form onSubmit={handleSubmitProfile} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input required placeholder="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full px-4 py-3 rounded-lg border-2 text-black" />
+                <input required placeholder="Designation / Domain" value={form.designation} onChange={e => setForm({...form, designation: e.target.value})} className="w-full px-4 py-3 rounded-lg border-2 text-black" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input required placeholder="Experience (e.g., 10+ years)" value={form.experience} onChange={e => setForm({...form, experience: e.target.value})} className="w-full px-4 py-3 rounded-lg border-2 text-black" />
+                <input placeholder="Focus Sectors (comma separated)" value={form.sectors} onChange={e => setForm({...form, sectors: e.target.value})} className="w-full px-4 py-3 rounded-lg border-2 text-black" />
+              </div>
+              <textarea placeholder="Short Description / Bio" value={form.bio} onChange={e => setForm({...form, bio: e.target.value})} className="w-full px-4 py-3 rounded-lg border-2 text-black" />
+              <input placeholder="LinkedIn URL" value={form.linkedin} onChange={e => setForm({...form, linkedin: e.target.value})} className="w-full px-4 py-3 rounded-lg border-2 text-black" />
+              <div className="text-center">
+                <button type="submit" className="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold">Submit Profile</button>
+              </div>
+            </form>
+          </AnimatedCard>
         </div>
 
         {/* CTA Section */}

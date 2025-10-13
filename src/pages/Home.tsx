@@ -147,6 +147,19 @@ export default function Home() {
           From concept to MVP and beyond, we are your partners in innovation. Let's build the future together.
         </p>
       </section>
+
+      {/* Collaborations Section */}
+      <section className="w-full max-w-6xl mt-12 px-6 py-12 rounded-2xl bg-gradient-to-r from-white/3 to-white/2 border border-white/5">
+        <h3 className="text-2xl md:text-3xl font-bold text-orange-400 text-center mb-6">Collaborations</h3>
+        <p className="text-center text-gray-300 max-w-2xl mx-auto mb-6">We partner with industry leaders and innovators. Here are some of our collaborators (logos are placeholders).</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 items-center">
+          {Array.from({length:6}).map((_,i) => (
+            <div key={i} className="flex items-center justify-center p-4 bg-white/5 rounded-lg h-20">
+              <img src={`https://via.placeholder.com/120x40?text=Logo+${i+1}`} alt={`logo-${i}`} className="object-contain h-10" />
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

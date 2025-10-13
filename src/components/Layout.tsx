@@ -3,7 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Menu, X, ArrowUp, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/useAuth';
 import AIChatbot from './AIChatbot';
+import AuthModal from './AuthModal';
 import logoImage from '/logo.jpg';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -12,8 +14,16 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const location = useLocation();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   const cartCount = getItemCount();
+  const { user, loading, signOut } = useAuth();
+
+  const handleAuthClick = (mode: 'login' | 'signup') => {
+    setAuthMode(mode);
+    setAuthModalOpen(true);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,6 +90,49 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   {item.name}
                 </Link>
               ))}
+              
+              {/* Auth buttons */}
+              {!loading && !user && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleAuthClick('login')}
+                    className="px-3 py-2 rounded-md text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    onClick={() => handleAuthClick('signup')}
+                    className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Sign up
+                  </button>
+                </div>
+              )}
+
+              {!loading && user && (
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
+                    {user.user_metadata?.avatar_url && (
+                      <img 
+                        src={user.user_metadata.avatar_url} 
+                        alt="Profile" 
+                        className="w-8 h-8 rounded-full object-cover border-2 border-orange-500"
+                      />
+                    )}
+                    <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span className="font-medium">
+                        {user.user_metadata?.full_name || user.email?.split('@')[0] || user.email}
+                      </span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => signOut()} 
+                    className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
               
               {/* Cart Icon */}
               <Link
@@ -159,6 +212,46 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {item.name}
                   </Link>
                 ))}
+                {/* Mobile Auth Buttons */}
+                {!loading && !user && (
+                  <div className="flex flex-col gap-2 px-3 py-2">
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        handleAuthClick('login');
+                      }}
+                      className="w-full py-2 rounded-md text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        handleAuthClick('signup');
+                      }}
+                      className="w-full py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Sign up
+                    </button>
+                  </div>
+                )}
+                {!loading && user && (
+                  <div className="px-3 py-2 space-y-2">
+                    <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span>Signed in as</span><br />
+                      <span className="font-medium">{user.email}</span>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        signOut();
+                        setIsMenuOpen(false);
+                      }} 
+                      className="w-full py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -193,6 +286,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* AI Chatbot */}
       <AIChatbot />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        mode={authMode}
+        onModeChange={setAuthMode}
+      />
     </div>
   );
 };

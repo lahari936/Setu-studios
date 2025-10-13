@@ -36,14 +36,14 @@ const Notification: React.FC<NotificationProps> = ({
     }
   };
 
-  const getBgColor = () => {
+  const getTextColor = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800';
+        return 'text-green-600';
       case 'error':
-        return 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800';
+        return 'text-red-600';
       default:
-        return 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800';
+        return 'text-gray-900 dark:text-gray-100';
     }
   };
 
@@ -53,9 +53,9 @@ const Notification: React.FC<NotificationProps> = ({
     <div className={`fixed top-4 right-4 z-50 transform transition-all duration-300 ${
       isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
     }`}>
-      <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg border shadow-lg ${getBgColor()}`}>
+      <div className="flex items-center space-x-3 px-4 py-3 rounded-lg border shadow-lg bg-white dark:bg-slate-800">
         {getIcon()}
-        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <span className={`text-sm font-medium ${getTextColor()}`}>
           {message}
         </span>
         <button
