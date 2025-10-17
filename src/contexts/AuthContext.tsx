@@ -1,18 +1,20 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase } from '../config/supabase';
+import { User as FirebaseUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
+import { auth, googleProvider } from '../config/firebase';
 import { createUser, getUser, updateUser, User } from '../services/database';
 import { useNotification } from './NotificationContext';
 
 interface AuthContextType {
-  user: SupabaseUser | null;
+  user: FirebaseUser | null;
   userProfile: User | null;
   loading: boolean;
-  signIn: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithLinkedIn: (accessToken: string) => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  refreshSession: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,18 +24,40 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { showNotification } = useNotification();
 
-  // Create or update user profile when Supabase user changes
+  // Create or update user profile when Firebase user changes
   useEffect(() => {
     if (user) {
       const createOrUpdateProfile = async () => {
+        // Check if Supabase is properly configured
+        const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
+          import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
+          import.meta.env.VITE_SUPABASE_ANON_KEY && 
+          import.meta.env.VITE_SUPABASE_ANON_KEY !== 'placeholder-anon-key';
+
+        if (!isSupabaseConfigured) {
+          // Create a local profile object when Supabase is not configured
+          const localProfile: User = {
+            id: user.uid,
+            email: user.email || '',
+            name: user.displayName || user.email?.split('@')[0] || '',
+            phone: user.phoneNumber || '',
+            company: '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          setUserProfile(localProfile);
+          console.log('Using local profile (Supabase not configured)');
+          return;
+        }
+
         try {
           // Try to get existing user profile
-          const existingProfile = await getUser(user.id);
+          const existingProfile = await getUser(user.uid);
           setUserProfile(existingProfile);
         } catch (error) {
           // If user doesn't exist or fetch failed, create new profile
@@ -41,13 +65,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           try {
             const newProfile = await createUser({
               email: user.email || '',
-              name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-              phone: user.user_metadata?.phone || ''
-            }, user.id);
+              name: user.displayName || user.email?.split('@')[0] || '',
+              phone: user.phoneNumber || ''
+            }, user.uid);
             setUserProfile(newProfile);
           } catch (createError) {
             console.error('Failed to create new profile', createError);
-            showNotification?.('Could not create user profile automatically.', 'error');
+            // Create a local profile as fallback instead of showing error
+            const fallbackProfile: User = {
+              id: user.uid,
+              email: user.email || '',
+              name: user.displayName || user.email?.split('@')[0] || '',
+              phone: user.phoneNumber || '',
+              company: '',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            setUserProfile(fallbackProfile);
+            console.log('Using fallback local profile due to database error');
           }
         }
       };
@@ -59,36 +94,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [user, showNotification]);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    // Listen for Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log('Firebase auth state changed:', firebaseUser?.email);
+      setUser(firebaseUser);
       setLoading(false);
+
+      // Handle sign out
+      if (!firebaseUser) {
+        setUserProfile(null);
+        // Clear any cached data
+        localStorage.removeItem('user_preferences');
+      }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    return () => unsubscribe();
+  }, [showNotification]);
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signIn = async () => {
+  const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      // Use Firebase Google sign-in
-      const { auth, googleProvider } = await import('../config/firebase');
-      const { signInWithPopup } = await import('firebase/auth');
-  await signInWithPopup(auth, googleProvider);
-      // You may want to extract user info and setUser here
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log('Google sign-in successful:', result.user.email);
       showNotification?.('Successfully signed in with Google', 'success');
-      // Optionally, setUser(result.user) if you want to track Firebase user
+    } catch (error: any) {
+      console.error('Google sign-in error:', error);
+      showNotification?.('Google sign-in failed. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithLinkedIn = async (accessToken: string) => {
+    try {
+      setLoading(true);
+      // Note: Firebase doesn't have built-in LinkedIn provider
+      // This would need to be implemented with custom token or third-party solution
+      showNotification?.('LinkedIn sign-in not yet implemented with Firebase', 'info');
     } catch (error) {
-      console.error(error);
-      showNotification?.('Google sign-in failed. Please try again later.', 'error');
+      console.error('LinkedIn sign-in error:', error);
+      showNotification?.('LinkedIn sign-in failed. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -97,45 +142,89 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      // Clear local storage and session data
+      localStorage.removeItem('user_preferences');
+      sessionStorage.clear();
+      
+      // Sign out from Firebase
+      await firebaseSignOut(auth);
+      
+      // Clear user profile
       setUserProfile(null);
+      
+      // Redirect to homepage
+      window.location.href = '/';
+      
+      showNotification?.('Successfully signed out', 'success');
     } catch (error) {
-      console.error(error);
-      showNotification?.('Sign-out failed. Please try again later.', 'error');
+      console.error('Sign-out error:', error);
+      showNotification?.('Sign-out failed. Please try again.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshSession = async () => {
+    try {
+      // Firebase automatically handles token refresh
+      // This method is kept for compatibility but doesn't need to do anything
+      showNotification?.('Session is automatically managed by Firebase', 'info');
+    } catch (error) {
+      console.error('Session refresh error:', error);
+      showNotification?.('Session refresh failed', 'error');
     }
   };
 
   const updateProfile = async (updates: Partial<User>) => {
     if (!user || !userProfile) return;
 
+    // Check if Supabase is properly configured
+    const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
+      import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
+      import.meta.env.VITE_SUPABASE_ANON_KEY && 
+      import.meta.env.VITE_SUPABASE_ANON_KEY !== 'placeholder-anon-key';
+
+    if (!isSupabaseConfigured) {
+      // Update local profile when Supabase is not configured
+      const updatedProfile = { ...userProfile, ...updates, updated_at: new Date().toISOString() };
+      setUserProfile(updatedProfile);
+      console.log('Updated local profile (Supabase not configured)');
+      return;
+    }
+
     try {
-      const updatedProfile = await updateUser(user.id, updates);
+      const updatedProfile = await updateUser(user.uid, updates);
       setUserProfile(updatedProfile);
     } catch (error) {
       console.error(error);
-      showNotification?.('Profile update failed. Please try again.', 'error');
+      // Fallback to local update if database update fails
+      const fallbackProfile = { ...userProfile, ...updates, updated_at: new Date().toISOString() };
+      setUserProfile(fallbackProfile);
+      console.log('Updated local profile due to database error');
     }
   };
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
       setLoading(true);
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        showNotification?.('Sign-in disabled: Supabase not configured', 'error');
+      if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+        showNotification?.('Sign-in disabled: Firebase not configured', 'error');
         return;
       }
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      if (error) throw error;
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Email sign-in successful:', result.user.email);
       showNotification?.('Successfully signed in', 'success');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      showNotification?.('Sign-in failed. Please check your credentials.', 'error');
+      const errorMessage = error.code === 'auth/user-not-found' 
+        ? 'No account found with this email address'
+        : error.code === 'auth/wrong-password'
+        ? 'Incorrect password'
+        : error.code === 'auth/invalid-email'
+        ? 'Invalid email address'
+        : 'Sign-in failed. Please check your credentials.';
+      showNotification?.(errorMessage, 'error');
       throw error;
     } finally {
       setLoading(false);
@@ -145,22 +234,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUpWithEmail = async (email: string, password: string) => {
     try {
       setLoading(true);
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        showNotification?.('Sign-up disabled: Supabase not configured', 'error');
+      if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+        showNotification?.('Sign-up disabled: Firebase not configured', 'error');
         return;
       }
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`
-        }
-      });
-      if (error) throw error;
-      showNotification?.('Please check your email to confirm your account', 'success');
-    } catch (error) {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Email sign-up successful:', result.user.email);
+      showNotification?.('Account created successfully!', 'success');
+    } catch (error: any) {
       console.error(error);
-      showNotification?.('Sign-up failed. Please try again.', 'error');
+      const errorMessage = error.code === 'auth/email-already-in-use'
+        ? 'An account with this email already exists'
+        : error.code === 'auth/weak-password'
+        ? 'Password should be at least 6 characters'
+        : error.code === 'auth/invalid-email'
+        ? 'Invalid email address'
+        : 'Sign-up failed. Please try again.';
+      showNotification?.(errorMessage, 'error');
       throw error;
     } finally {
       setLoading(false);
@@ -171,11 +261,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     userProfile,
     loading,
-    signIn,
+    signInWithGoogle,
+    signInWithLinkedIn,
     signInWithEmail,
     signUpWithEmail,
     signOut,
-    updateProfile
+    updateProfile,
+    refreshSession
   };
 
   return (

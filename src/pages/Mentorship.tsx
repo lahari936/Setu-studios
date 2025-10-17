@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Briefcase, Award, Users } from 'lucide-react';
+import { GraduationCap, Briefcase, Award, Users, Calendar, MapPin, Clock, Star, ExternalLink, ChevronDown, ChevronUp, Linkedin, Mail, MessageCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import AnimatedCard from '../components/AnimatedCard';
 import EnquiryModal from '../components/EnquiryModal';
+import CalendlyWidget from '../components/CalendlyWidget';
 import mentorsData from '../data/mentors.json';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -15,16 +16,29 @@ interface Mentor {
   experience: string;
   company: string;
   verified?: boolean;
+  bio?: string;
+  linkedin?: string;
+  email?: string;
+  calendlyUrl?: string;
+  location?: string;
+  rating?: number;
+  sessionsCompleted?: number;
+  specialties?: string[];
 }
 
 const Mentorship: React.FC = () => {
   const { isDark } = useTheme();
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
+  const [expandedMentor, setExpandedMentor] = useState<number | null>(null);
+  const [calendlyOpen, setCalendlyOpen] = useState(false);
+  const [calendlyMentor, setCalendlyMentor] = useState<Mentor | null>(null);
   const { showNotification } = useNotification();
 
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [showUnverified, setShowUnverified] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDomain, setSelectedDomain] = useState('');
 
   // Form state for mentor submission
   const [form, setForm] = useState({ name: '', designation: '', experience: '', sectors: '', bio: '', linkedin: '' });
@@ -32,6 +46,19 @@ const Mentorship: React.FC = () => {
   const handleConnect = (mentor: Mentor) => {
     setSelectedMentor(mentor);
     setEnquiryModalOpen(true);
+  };
+
+  const handleScheduleMeeting = (mentor: Mentor) => {
+    if (mentor.calendlyUrl) {
+      setCalendlyMentor(mentor);
+      setCalendlyOpen(true);
+    } else {
+      showNotification('Meeting scheduling not available for this mentor yet', 'warning');
+    }
+  };
+
+  const toggleExpanded = (mentorId: number) => {
+    setExpandedMentor(expandedMentor === mentorId ? null : mentorId);
   };
 
   useEffect(() => {
@@ -47,6 +74,20 @@ const Mentorship: React.FC = () => {
       setMentors(mentorsData as Mentor[]);
     }
   }, []);
+
+  // Filter mentors based on search and domain
+  const filteredMentors = mentors.filter(mentor => {
+    const matchesSearch = mentor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         mentor.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         mentor.expertise.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDomain = selectedDomain === '' || mentor.domain === selectedDomain;
+    const matchesVerification = showUnverified || mentor.verified;
+    
+    return matchesSearch && matchesDomain && matchesVerification;
+  });
+
+  // Get unique domains for filter
+  const domains = Array.from(new Set(mentors.map(m => m.domain)));
 
   const persistMentors = (list: Mentor[]) => {
     setMentors(list);
@@ -124,21 +165,71 @@ const Mentorship: React.FC = () => {
           </AnimatedCard>
         </div>
 
-        {/* Mentors Grid */}
+        {/* Search and Filter Section */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-8 text-center">Meet Our Mentors</h2>
-          <div className="flex items-center justify-center mb-6 gap-4">
-            <label className="text-sm flex items-center gap-2">
-              <input type="checkbox" checked={showUnverified} onChange={() => setShowUnverified(v => !v)} />
-              Show Unverified
+          
+          {/* Search and Filter Controls */}
+          <div className="max-w-4xl mx-auto mb-8 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Search mentors by name, domain, or expertise..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-lg border-2 ${
+                    isDark 
+                      ? 'bg-slate-800 border-slate-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  } focus:border-orange-500 focus:outline-none transition-colors`}
+                />
+              </div>
+              <div className="md:w-64">
+                <select
+                  value={selectedDomain}
+                  onChange={(e) => setSelectedDomain(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-lg border-2 ${
+                    isDark 
+                      ? 'bg-slate-800 border-slate-600 text-white' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:border-orange-500 focus:outline-none transition-colors`}
+                >
+                  <option value="">All Domains</option>
+                  {domains.map(domain => (
+                    <option key={domain} value={domain}>{domain}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center gap-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input 
+                  type="checkbox" 
+                  checked={showUnverified} 
+                  onChange={() => setShowUnverified(v => !v)}
+                  className="rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                />
+                <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Show Unverified Mentors</span>
             </label>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mentors.filter(m => showUnverified ? true : m.verified).map((mentor) => (
-              <AnimatedCard key={mentor.id} className="overflow-hidden">
-                <div className="p-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-orange-500">
+
+          {/* Mentors Grid - LinkedIn Style */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {filteredMentors.map((mentor) => (
+              <AnimatedCard key={mentor.id} className={`overflow-hidden transition-all duration-300 ${
+                expandedMentor === mentor.id ? 'lg:col-span-2' : ''
+              }`}>
+                {/* LinkedIn-style Card Header */}
+                <div className="relative">
+                  {/* Background Banner */}
+                  <div className="h-20 bg-gradient-to-r from-orange-500 to-red-500"></div>
+                  
+                  {/* Profile Picture */}
+                  <div className="absolute -bottom-8 left-6">
+                    <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg">
                       <img 
                         src={mentor.photo} 
                         alt={mentor.name}
@@ -148,28 +239,138 @@ const Mentorship: React.FC = () => {
                         }}
                       />
                     </div>
-                    <h3 className="text-xl font-bold mb-2 text-orange-500">{mentor.name}</h3>
-                    {!mentor.verified && (
-                      <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full mb-2">Unverified</span>
+                  </div>
+                  
+                  {/* Expand/Collapse Button */}
+                  <button
+                    onClick={() => toggleExpanded(mentor.id)}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                  >
+                    {expandedMentor === mentor.id ? (
+                      <ChevronUp size={20} className="text-white" />
+                    ) : (
+                      <ChevronDown size={20} className="text-white" />
                     )}
-                    <p className={`text-sm font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {mentor.domain}
-                    </p>
-                    <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {mentor.expertise}
-                    </p>
-                    <div className="flex items-center gap-2 mb-3 text-sm">
-                      <Briefcase size={16} className="text-orange-500" />
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>{mentor.company}</span>
+                  </button>
+                </div>
+
+                {/* Card Content */}
+                <div className="pt-10 px-6 pb-6">
+                  {/* Basic Info */}
+                  <div className="mb-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{mentor.name}</h3>
+                        <p className="text-orange-500 font-semibold">{mentor.domain}</p>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {mentor.company}
+                        </p>
+                      </div>
+                      {mentor.verified && (
+                        <div className="flex items-center gap-1 text-green-600">
+                          <Award size={16} />
+                          <span className="text-xs font-semibold">Verified</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 mb-4 text-sm">
-                      <Award size={16} className="text-orange-500" />
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>{mentor.experience} Experience</span>
+                    
+                    {/* Rating and Sessions */}
+                    <div className="flex items-center gap-4 text-sm mb-3">
+                      {mentor.rating && (
+                        <div className="flex items-center gap-1">
+                          <Star size={16} className="text-yellow-500 fill-current" />
+                          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>
+                            {mentor.rating} ({mentor.sessionsCompleted || 0} sessions)
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <MapPin size={16} className="text-orange-500" />
+                        <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                          {mentor.location || 'Remote'}
+                        </span>
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Expanded Content */}
+                  {expandedMentor === mentor.id && (
+                    <div className="space-y-4 border-t pt-4">
+                      {/* Bio */}
+                      {mentor.bio && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">About</h4>
+                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} leading-relaxed`}>
+                            {mentor.bio}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Specialties */}
+                      {mentor.specialties && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Specialties</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {mentor.specialties.map((specialty, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded-full"
+                              >
+                                {specialty}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Experience Details */}
+                      <div className="flex items-center gap-2 text-sm">
+                        <Briefcase size={16} className="text-orange-500" />
+                        <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                          {mentor.experience} Experience
+                        </span>
+                      </div>
+
+                      {/* Contact Links */}
+                      <div className="flex items-center gap-4">
+                        {mentor.linkedin && (
+                          <a
+                            href={mentor.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
+                          >
+                            <Linkedin size={16} />
+                            LinkedIn
+                          </a>
+                        )}
+                        {mentor.email && (
+                          <a
+                            href={`mailto:${mentor.email}`}
+                            className="flex items-center gap-2 text-gray-600 hover:text-gray-700 text-sm"
+                          >
+                            <Mail size={16} />
+                            Email
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      onClick={() => handleScheduleMeeting(mentor)}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
+                    >
+                      <Calendar size={16} />
+                      Schedule Meeting
+                    </button>
                     <button
                       onClick={() => handleConnect(mentor)}
-                      className="w-full px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
+                      className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 dark:hover:bg-slate-800 transition-all duration-300"
                     >
+                      <MessageCircle size={16} />
                       Connect
                     </button>
                   </div>
@@ -177,6 +378,17 @@ const Mentorship: React.FC = () => {
               </AnimatedCard>
             ))}
           </div>
+
+          {/* No Results */}
+          {filteredMentors.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No mentors found</h3>
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Try adjusting your search criteria or showing unverified mentors.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Create Mentor Profile Section */}
@@ -231,6 +443,19 @@ const Mentorship: React.FC = () => {
             : "Let's connect to find the perfect mentor for your startup journey!"
         }
       />
+
+      {/* Calendly Widget */}
+      {calendlyMentor && (
+        <CalendlyWidget
+          mentorName={calendlyMentor.name}
+          calendlyUrl={calendlyMentor.calendlyUrl || ''}
+          isOpen={calendlyOpen}
+          onClose={() => {
+            setCalendlyOpen(false);
+            setCalendlyMentor(null);
+          }}
+        />
+      )}
     </div>
   );
 };

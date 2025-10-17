@@ -4,8 +4,10 @@ import { Moon, Sun, Menu, X, ArrowUp, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/useAuth';
+import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import AIChatbot from './AIChatbot';
 import AuthModal from './AuthModal';
+import ProfileDropdown from './ProfileDropdown';
 import logoImage from '/logo.jpg';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -16,9 +18,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const { smoothNavigate, isNavigating } = useSmoothNavigation();
 
   const cartCount = getItemCount();
-  const { user, loading, signOut } = useAuth();
+  const { user, userProfile, loading, signOut } = useAuth();
 
   const handleAuthClick = (mode: 'login' | 'signup') => {
     setAuthMode(mode);
@@ -78,17 +81,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               {navItems.map((item) => (
-                <Link
+                <button
                   key={item.name}
-                  to={item.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:text-orange-500 ${
+                  onClick={() => smoothNavigate(item.path)}
+                  disabled={isNavigating}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:text-orange-500 disabled:opacity-50 ${
                     isActive(item.path)
                       ? 'text-orange-500 bg-orange-500/10'
                       : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
                   }`}
                 >
                   {item.name}
-                </Link>
+                </button>
               ))}
               
               {/* Auth buttons */}
@@ -110,28 +114,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               )}
 
               {!loading && user && (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-3">
-                    {user.user_metadata?.avatar_url && (
-                      <img 
-                        src={user.user_metadata.avatar_url} 
-                        alt="Profile" 
-                        className="w-8 h-8 rounded-full object-cover border-2 border-orange-500"
-                      />
-                    )}
-                    <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      <span className="font-medium">
-                        {user.user_metadata?.full_name || user.email?.split('@')[0] || user.email}
-                      </span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => signOut()} 
-                    className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
+                <ProfileDropdown 
+                  user={user} 
+                  userProfile={userProfile} 
+                  isDark={isDark} 
+                />
               )}
               
               {/* Cart Icon */}
@@ -199,18 +186,21 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 isDark ? 'border-slate-800' : 'border-slate-200'
               }`}>
                 {navItems.map((item) => (
-                  <Link
+                  <button
                     key={item.name}
-                    to={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
+                    onClick={() => {
+                      smoothNavigate(item.path);
+                      setIsMenuOpen(false);
+                    }}
+                    disabled={isNavigating}
+                    className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-200 disabled:opacity-50 ${
                       isActive(item.path)
                         ? 'text-orange-500 bg-orange-500/10'
                         : isDark ? 'text-gray-300 hover:text-white hover:bg-slate-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
                     {item.name}
-                  </Link>
+                  </button>
                 ))}
                 {/* Mobile Auth Buttons */}
                 {!loading && !user && (
@@ -236,10 +226,44 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </div>
                 )}
                 {!loading && user && (
-                  <div className="px-3 py-2 space-y-2">
-                    <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      <span>Signed in as</span><br />
-                      <span className="font-medium">{user.email}</span>
+                  <div className="px-3 py-2 space-y-3">
+                    <div className="flex items-center gap-3">
+                      {/* Profile Picture with fallback */}
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-orange-500 bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                        {user.photoURL ? (
+                          <img 
+                            src={user.photoURL} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-orange-600 dark:text-orange-400 font-semibold text-lg">
+                            {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                        <div>Signed in as</div>
+                        <div className="font-medium">
+                          {user.displayName || user.email?.split('@')[0] || user.email}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Link 
+                        to="/profile"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="block w-full py-2 px-3 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        My Profile
+                      </Link>
+                      <Link 
+                        to="/settings"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="block w-full py-2 px-3 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        Settings
+                      </Link>
                     </div>
                     <button 
                       onClick={() => {

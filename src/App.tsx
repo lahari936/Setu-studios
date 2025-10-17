@@ -12,6 +12,7 @@ import IdeaAnalyzer from './pages/IdeaAnalyzer';
 import Mentorship from './pages/Mentorship';
 import Blog from './pages/Blog';
 import SubmitStory from './pages/SubmitStory';
+import LinkedInCallback from './pages/LinkedInCallback';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
                   <Route path="/mentorship" element={<Mentorship />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/submit-story" element={<SubmitStory />} />
+                  <Route path="/linkedin-callback" element={<LinkedInCallback />} />
                 </Routes>
               </Layout>
             </Router>

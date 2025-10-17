@@ -11,7 +11,15 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'setu-studios-auth-token',
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'setu-studios-web'
+    }
   }
 });
 

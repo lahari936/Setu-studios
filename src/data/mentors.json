@@ -7,7 +7,15 @@
     "photo": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
     "experience": "15+ years",
     "company": "AI Innovations Lab",
-    "verified": true
+    "verified": true,
+    "bio": "Leading AI researcher with 15+ years of experience in machine learning and deep learning. Former Google AI researcher, now helping startups integrate AI solutions into their products.",
+    "linkedin": "https://linkedin.com/in/ananya-sharma-ai",
+    "email": "ananya@aiinnovations.com",
+    "calendlyUrl": "https://calendly.com/dr-ananya-sharma",
+    "location": "San Francisco, CA",
+    "rating": 4.9,
+    "sessionsCompleted": 150,
+    "specialties": ["Machine Learning", "Deep Learning", "NLP", "Computer Vision", "AI Strategy"]
   },
   {
     "id": 2,
@@ -17,7 +25,15 @@
     "photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
     "experience": "12+ years",
     "company": "Tech Unicorn Ventures",
-    "verified": true
+    "verified": true,
+    "bio": "Product leader with 12+ years of experience scaling products from 0 to millions of users. Former VP of Product at multiple unicorn startups.",
+    "linkedin": "https://linkedin.com/in/rajesh-patel-pm",
+    "email": "rajesh@techunicorn.com",
+    "calendlyUrl": "https://calendly.com/rajesh-patel-pm",
+    "location": "New York, NY",
+    "rating": 4.8,
+    "sessionsCompleted": 120,
+    "specialties": ["Product Strategy", "User Research", "Roadmapping", "Growth", "MVP Development"]
   },
   {
     "id": 3,
@@ -27,7 +43,15 @@
     "photo": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
     "experience": "10+ years",
     "company": "Summit Capital Partners",
-    "verified": true
+    "verified": true,
+    "bio": "Venture Capital partner with 10+ years of experience in early-stage investments. Has led 50+ funding rounds and helped startups raise over $200M.",
+    "linkedin": "https://linkedin.com/in/priya-menon-vc",
+    "email": "priya@summitcapital.com",
+    "calendlyUrl": "https://calendly.com/priya-menon-vc",
+    "location": "Palo Alto, CA",
+    "rating": 4.9,
+    "sessionsCompleted": 200,
+    "specialties": ["Fundraising", "Pitch Decks", "Term Sheets", "Valuation", "Investor Relations"]
   },
   {
     "id": 4,
