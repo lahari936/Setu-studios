@@ -94,6 +94,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [user, showNotification]);
 
   useEffect(() => {
+    // Check if Firebase is configured
+    const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
+      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+
+    if (!isFirebaseConfigured) {
+      console.log('Firebase not configured, skipping auth state listener');
+      setLoading(false);
+      return;
+    }
+
     // Listen for Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       console.log('Firebase auth state changed:', firebaseUser?.email);
@@ -112,6 +122,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [showNotification]);
 
   const signInWithGoogle = async () => {
+    const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
+      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+
+    if (!isFirebaseConfigured) {
+      showNotification?.('Authentication is not configured. Please contact support.', 'error');
+      return;
+    }
+
     try {
       setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
@@ -206,12 +224,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signInWithEmail = async (email: string, password: string) => {
+    const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
+      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+
+    if (!isFirebaseConfigured) {
+      showNotification?.('Authentication is not configured. Please contact support.', 'error');
+      return;
+    }
+
     try {
       setLoading(true);
-      if (!import.meta.env.VITE_FIREBASE_API_KEY) {
-        showNotification?.('Sign-in disabled: Firebase not configured', 'error');
-        return;
-      }
       const result = await signInWithEmailAndPassword(auth, email, password);
       console.log('Email sign-in successful:', result.user.email);
       showNotification?.('Successfully signed in', 'success');
@@ -232,12 +254,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signUpWithEmail = async (email: string, password: string) => {
+    const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
+      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+
+    if (!isFirebaseConfigured) {
+      showNotification?.('Authentication is not configured. Please contact support.', 'error');
+      return;
+    }
+
     try {
       setLoading(true);
-      if (!import.meta.env.VITE_FIREBASE_API_KEY) {
-        showNotification?.('Sign-up disabled: Firebase not configured', 'error');
-        return;
-      }
       const result = await createUserWithEmailAndPassword(auth, email, password);
       console.log('Email sign-up successful:', result.user.email);
       showNotification?.('Account created successfully!', 'success');
