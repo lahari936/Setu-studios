@@ -20,6 +20,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotification } from '../contexts/NotificationContext';
 import AnimatedCard from '../components/AnimatedCard';
+import ReportDownloadNotification from '../components/ReportDownloadNotification';
 import { analyzeStartupIdea, StartupAnalysis } from '../services/gemini';
 
 const IdeaAnalyzer: React.FC = () => {
@@ -32,6 +33,7 @@ const IdeaAnalyzer: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [analysisData, setAnalysisData] = useState<StartupAnalysis | null>(null);
+  const [showDownloadNotification, setShowDownloadNotification] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -92,6 +94,9 @@ ${analysisData.elevator_pitch_1_minute.closing}`;
 
   const downloadReport = () => {
     if (!analysisData) return;
+    
+    // Show download notification
+    setShowDownloadNotification(true);
     
     const reportContent = `
 # 🚀 COMPREHENSIVE STARTUP ANALYSIS REPORT
@@ -326,7 +331,7 @@ ${analysisData.elevator_pitch_1_minute.closing}
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    showNotification('Comprehensive report downloaded successfully!', 'success');
+    // The notification will auto-close after completion
   };
 
   return (
@@ -1261,6 +1266,13 @@ ${analysisData.elevator_pitch_1_minute.closing}
           )
         )}
       </div>
+
+      {/* Report Download Notification */}
+      <ReportDownloadNotification
+        isVisible={showDownloadNotification}
+        onClose={() => setShowDownloadNotification(false)}
+        message="Your comprehensive startup analysis report is being prepared..."
+      />
     </div>
   );
 };

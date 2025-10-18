@@ -8,6 +8,7 @@ import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
 import AIChatbot from './AIChatbot';
 import AuthModal from './AuthModal';
 import ProfileDropdown from './ProfileDropdown';
+import EnquiryModal from './EnquiryModal';
 import logoImage from '/logo.jpg';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -18,6 +19,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
   const { smoothNavigate, isNavigating } = useSmoothNavigation();
 
   const cartCount = getItemCount();
@@ -95,6 +97,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </button>
               ))}
               
+              {/* Enquiry Button */}
+              <button
+                onClick={() => setEnquiryModalOpen(true)}
+                className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Get Quote
+              </button>
+
               {/* Auth buttons */}
               {!loading && !user && (
                 <div className="flex items-center gap-2">
@@ -202,6 +212,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {item.name}
                   </button>
                 ))}
+                {/* Mobile Enquiry Button */}
+                <div className="px-3 py-2">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setEnquiryModalOpen(true);
+                    }}
+                    className="w-full py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Get Quote
+                  </button>
+                </div>
+
                 {/* Mobile Auth Buttons */}
                 {!loading && !user && (
                   <div className="flex flex-col gap-2 px-3 py-2">
@@ -317,6 +340,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         onClose={() => setAuthModalOpen(false)}
         mode={authMode}
         onModeChange={setAuthMode}
+      />
+
+      {/* Enquiry Modal */}
+      <EnquiryModal
+        isOpen={enquiryModalOpen}
+        onClose={() => setEnquiryModalOpen(false)}
       />
     </div>
   );

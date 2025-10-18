@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Sparkles } from 'lucide-react';
+import { MessageCircle, Send, X, Sparkles, Bot, User } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -29,6 +30,47 @@ const AIChatbot: React.FC = () => {
   }, [messages]);
 
   const getAIResponse = async (userMessage: string): Promise<string> => {
+    try {
+      // Check if Gemini API is configured
+      const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      
+      if (!geminiApiKey || geminiApiKey === 'your_gemini_api_key_here') {
+        // Fallback to local responses if Gemini is not configured
+        return getLocalAIResponse(userMessage);
+      }
+
+      // Use Gemini API for real AI responses
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `You are an expert startup advisor and AI co-founder assistant. Provide helpful, actionable advice for entrepreneurs and startup founders. Keep responses concise but comprehensive (2-3 paragraphs max). Focus on practical, actionable insights.
+
+User question: ${userMessage}
+
+Context: This is a startup platform called Setu Studios that helps founders with idea analysis, mentorship, and startup development.`
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await response.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || getLocalAIResponse(userMessage);
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      return getLocalAIResponse(userMessage);
+    }
+  };
+
+  const getLocalAIResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
 
     if (lowerMessage.includes('fundrais') || lowerMessage.includes('funding') || lowerMessage.includes('investor')) {
@@ -75,20 +117,38 @@ const AIChatbot: React.FC = () => {
   return (
     <>
       {/* Floating Button */}
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-300 hover:shadow-orange-500/50 group"
-          aria-label="Open AI Assistant"
-        >
-          <MessageCircle size={28} />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-        </button>
-      )}
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsOpen(true)}
+            className="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-2xl hover:shadow-orange-500/50 group backdrop-blur-sm"
+            aria-label="Open AI Assistant"
+          >
+            <MessageCircle size={28} />
+            <motion.span 
+              className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Chat Window */}
-      {isOpen && (
-        <div className={`fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] rounded-2xl shadow-2xl ${isDark ? 'bg-slate-900 border-2 border-orange-500/30' : 'bg-white border-2 border-orange-500/30'} flex flex-col overflow-hidden`}>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className={`fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] rounded-2xl shadow-2xl backdrop-blur-xl ${isDark ? 'bg-slate-900/90 border border-orange-500/30' : 'bg-white/90 border border-orange-500/30'} flex flex-col overflow-hidden`}
+          >
           {/* Header */}
           <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -112,33 +172,62 @@ const AIChatbot: React.FC = () => {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                      : isDark
-                      ? 'bg-slate-800 text-gray-100'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                </div>
-              </div>
-            ))}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className={`rounded-2xl px-4 py-3 ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                <div className={`flex items-start gap-2 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div className={`p-2 rounded-full ${message.role === 'user' ? 'bg-orange-500' : 'bg-slate-600'}`}>
+                    {message.role === 'user' ? <User size={16} className="text-white" /> : <Bot size={16} className="text-white" />}
+                  </div>
+                  <div
+                    className={`rounded-2xl px-4 py-3 ${
+                      message.role === 'user'
+                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                        : isDark
+                        ? 'bg-slate-800/80 backdrop-blur-sm text-gray-100 border border-slate-700'
+                        : 'bg-gray-100/80 backdrop-blur-sm text-gray-900 border border-gray-200'
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
+            ))}
+            {isTyping && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex justify-start"
+              >
+                <div className="flex items-start gap-2">
+                  <div className="p-2 rounded-full bg-slate-600">
+                    <Bot size={16} className="text-white" />
+                  </div>
+                  <div className={`rounded-2xl px-4 py-3 ${isDark ? 'bg-slate-800/80 backdrop-blur-sm border border-slate-700' : 'bg-gray-100/80 backdrop-blur-sm border border-gray-200'}`}>
+                    <div className="flex gap-1">
+                      <motion.div 
+                        className="w-2 h-2 bg-orange-500 rounded-full"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                      />
+                      <motion.div 
+                        className="w-2 h-2 bg-orange-500 rounded-full"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                      />
+                      <motion.div 
+                        className="w-2 h-2 bg-orange-500 rounded-full"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -164,8 +253,9 @@ const AIChatbot: React.FC = () => {
               </button>
             </div>
           </form>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

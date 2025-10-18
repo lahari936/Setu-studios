@@ -108,28 +108,64 @@ export default function Home() {
         animate="visible"
       >
         <motion.button
-          className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl hover:border-orange-500 transition-all duration-300 text-center"
-          whileHover={{ scale: 1.05 }}
+          className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl hover:border-orange-500 transition-all duration-300 text-center group"
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/mentorship')}
         >
+          <motion.div
+            className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-500/30 transition-colors"
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="text-orange-500 text-xl">👥</span>
+          </motion.div>
           <h3 className="text-orange-500 font-bold text-lg mb-2">Find Mentors</h3>
           <p className="text-gray-400 text-sm">Connect with industry experts</p>
         </motion.button>
         <motion.button
-          className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl hover:border-orange-500 transition-all duration-300 text-center"
-          whileHover={{ scale: 1.05 }}
+          className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl hover:border-orange-500 transition-all duration-300 text-center group"
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/blog')}
         >
+          <motion.div
+            className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-500/30 transition-colors"
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="text-orange-500 text-xl">📚</span>
+          </motion.div>
           <h3 className="text-orange-500 font-bold text-lg mb-2">Read Stories</h3>
           <p className="text-gray-400 text-sm">Learn from real founders</p>
         </motion.button>
-        <div className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl transition-all duration-300 text-center">
+        <motion.div 
+          className="p-4 bg-[#10122b] border border-orange-500/30 rounded-xl transition-all duration-300 text-center group"
+          whileHover={{ scale: 1.05, y: -5 }}
+        >
+          <motion.div
+            className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-500/30 transition-colors"
+            animate={{ 
+              boxShadow: [
+                "0 0 0 0 rgba(255, 102, 0, 0.4)",
+                "0 0 0 10px rgba(255, 102, 0, 0)",
+                "0 0 0 0 rgba(255, 102, 0, 0)"
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <span className="text-orange-500 text-xl">🤖</span>
+          </motion.div>
           <h3 className="text-orange-500 font-bold text-lg mb-2">AI Assistant</h3>
           <p className="text-gray-400 text-sm">Chat with your co-founder AI</p>
-          <p className="text-orange-500/60 text-xs mt-2">👉 Check bottom-right corner</p>
-        </div>
+          <motion.p 
+            className="text-orange-500/60 text-xs mt-2"
+            animate={{ opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            👉 Check bottom-right corner
+          </motion.p>
+        </motion.div>
       </motion.div>
 
       {/* About Section */}
