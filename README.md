@@ -25,9 +25,41 @@ A comprehensive startup development platform that provides end-to-end services f
 
 - Node.js (v18 or higher)
 - npm or yarn
-- Supabase account
-- Google Gemini API key
-- EmailJS account
+- Firebase account (for authentication)
+- Supabase account (optional, for database features)
+- Google Gemini API key (optional, for AI features)
+- EmailJS account (optional, for email features)
+
+### Quick Setup (Authentication Required)
+
+**⚠️ Important:** Authentication must be configured for the app to work properly. Follow these steps:
+
+1. **Create a Firebase Project**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project
+   - Enable Authentication → Sign-in method
+   - Enable Email/Password and Google (optional)
+
+2. **Get Firebase Configuration**
+   - Go to Project Settings → General → Your apps
+   - Add a web app and copy the configuration values
+
+3. **Create Environment File**
+   - Create a `.env` file in the project root
+   - Add your Firebase configuration:
+   ```env
+   VITE_FIREBASE_API_KEY=your_firebase_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+   VITE_FIREBASE_APP_ID=your_firebase_app_id
+   ```
+
+4. **Restart Development Server**
+   ```bash
+   npm run dev
+   ```
 
 ### Installation
 

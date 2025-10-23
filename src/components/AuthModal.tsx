@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/useAuth';
 import { useNotification } from '../contexts/NotificationContext';
 import { X, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import AuthSetupGuide from './AuthSetupGuide';
 
 // Conditionally import LinkedIn component to prevent errors
 let LinkedInLogin: any = null;
@@ -28,6 +29,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isLinkedInLoading, setIsLinkedInLoading] = useState(false);
+
+  // Check if Firebase is configured
+  const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
+    import.meta.env.VITE_FIREBASE_API_KEY !== 'placeholder-api-key' &&
+    import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+    import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'placeholder-project';
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,12 +126,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
             </p>
           </div>
 
+          {/* Show setup guide if authentication is not configured */}
+          {!isFirebaseConfigured && (
+            <div className="mb-6">
+              <AuthSetupGuide />
+            </div>
+          )}
+
           {/* OAuth Buttons */}
           <div className="space-y-3 mb-6">
             <button
               type="button"
               onClick={handleGoogleAuth}
-              disabled={isGoogleLoading || isLoading}
+              disabled={!isFirebaseConfigured || isGoogleLoading || isLoading}
               className="w-full py-3 px-4 rounded-lg font-semibold bg-white border border-gray-300 text-gray-700 flex items-center justify-center gap-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {isGoogleLoading ? (
@@ -151,7 +165,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
               >
                 <button
                   type="button"
-                  disabled={isLinkedInLoading || isLoading}
+                  disabled={!isFirebaseConfigured || isLinkedInLoading || isLoading}
                   className="w-full py-3 px-4 rounded-lg font-semibold bg-[#0077B5] text-white flex items-center justify-center gap-3 hover:bg-[#005885] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   {isLinkedInLoading ? (
@@ -261,7 +275,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={!isFirebaseConfigured || isLoading}
               className="w-full py-3 px-4 bg-orange-500 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-all duration-200 flex items-center justify-center gap-2"
             >
               {isLoading ? (

@@ -96,7 +96,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Check if Firebase is configured
     const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
-      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+      import.meta.env.VITE_FIREBASE_API_KEY !== 'placeholder-api-key' &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'placeholder-project';
 
     if (!isFirebaseConfigured) {
       console.log('Firebase not configured, skipping auth state listener');
@@ -123,10 +125,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
-      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+      import.meta.env.VITE_FIREBASE_API_KEY !== 'placeholder-api-key' &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'placeholder-project';
 
     if (!isFirebaseConfigured) {
-      showNotification?.('Authentication is not configured. Please contact support.', 'error');
+      showNotification?.('Authentication is not configured. Please set up Firebase environment variables to enable authentication.', 'error');
+      console.warn('🔧 To enable authentication, please set up the following environment variables:');
+      console.warn('   VITE_FIREBASE_API_KEY');
+      console.warn('   VITE_FIREBASE_PROJECT_ID');
+      console.warn('   VITE_FIREBASE_AUTH_DOMAIN');
+      console.warn('   VITE_FIREBASE_APP_ID');
+      console.warn('   See AUTHENTICATION_SETUP.md for detailed instructions');
       return;
     }
 
@@ -225,10 +235,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithEmail = async (email: string, password: string) => {
     const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
-      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+      import.meta.env.VITE_FIREBASE_API_KEY !== 'placeholder-api-key' &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'placeholder-project';
 
     if (!isFirebaseConfigured) {
-      showNotification?.('Authentication is not configured. Please contact support.', 'error');
+      showNotification?.('Authentication is not configured. Please set up Firebase environment variables to enable authentication.', 'error');
+      console.warn('🔧 To enable authentication, please set up the following environment variables:');
+      console.warn('   VITE_FIREBASE_API_KEY');
+      console.warn('   VITE_FIREBASE_PROJECT_ID');
+      console.warn('   VITE_FIREBASE_AUTH_DOMAIN');
+      console.warn('   VITE_FIREBASE_APP_ID');
+      console.warn('   See AUTHENTICATION_SETUP.md for detailed instructions');
       return;
     }
 
@@ -255,10 +273,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signUpWithEmail = async (email: string, password: string) => {
     const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
-      import.meta.env.VITE_FIREBASE_PROJECT_ID;
+      import.meta.env.VITE_FIREBASE_API_KEY !== 'placeholder-api-key' &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+      import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'placeholder-project';
 
     if (!isFirebaseConfigured) {
-      showNotification?.('Authentication is not configured. Please contact support.', 'error');
+      showNotification?.('Authentication is not configured. Please set up Firebase environment variables to enable authentication.', 'error');
+      console.warn('🔧 To enable authentication, please set up the following environment variables:');
+      console.warn('   VITE_FIREBASE_API_KEY');
+      console.warn('   VITE_FIREBASE_PROJECT_ID');
+      console.warn('   VITE_FIREBASE_AUTH_DOMAIN');
+      console.warn('   VITE_FIREBASE_APP_ID');
+      console.warn('   See AUTHENTICATION_SETUP.md for detailed instructions');
       return;
     }
 

@@ -5,7 +5,9 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 // Check if Firebase is configured
 const isFirebaseConfigured = () => {
   return !!(import.meta.env.VITE_FIREBASE_API_KEY && 
-    import.meta.env.VITE_FIREBASE_PROJECT_ID);
+    import.meta.env.VITE_FIREBASE_API_KEY !== 'placeholder-api-key' &&
+    import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+    import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'placeholder-project');
 };
 
 // Firebase configuration from environment variables
