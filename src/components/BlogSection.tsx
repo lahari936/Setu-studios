@@ -89,6 +89,23 @@ const BlogSection: React.FC = () => {
     }
   ];
 
+  const generateBlogImage = async (title: string, description: string): Promise<string> => {
+    try {
+      // Try to generate an image using a free image API or placeholder service
+      // For now, we'll use a service that generates images based on text
+      const encodedTitle = encodeURIComponent(title);
+      const encodedDesc = encodeURIComponent(description.substring(0, 100));
+      
+      // Use Lorem Picsum with different seeds for variety
+      const seed = title.length + description.length;
+      return `https://picsum.photos/400/250?random=${seed}`;
+    } catch (error) {
+      console.warn('Failed to generate image:', error);
+      // Fallback to a default startup-related image
+      return `https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=250&fit=crop&auto=format`;
+    }
+  };
+
   const fetchBlogPosts = async () => {
     setLoading(true);
     setError(null);
@@ -115,24 +132,41 @@ const BlogSection: React.FC = () => {
       }
       
       if (allPosts.length > 0) {
-        const formattedPosts = allPosts.slice(0, 6).map((article: any, index: number) => ({
-          id: article.id.toString(),
-          title: article.title,
-          description: article.description || article.excerpt || 'Read more about this interesting startup topic...',
-          author: article.user.name,
-          publishedAt: article.published_at,
-          url: article.url,
-          coverImage: article.cover_image || `https://images.unsplash.com/photo-${1559136555 + index}?w=400&h=250&fit=crop`,
-          tags: article.tag_list.slice(0, 3)
-        }));
+        const formattedPosts = await Promise.all(
+          allPosts.slice(0, 6).map(async (article: any, index: number) => {
+            let coverImage = article.cover_image;
+            
+            // If no cover image, generate one
+            if (!coverImage) {
+              coverImage = await generateBlogImage(article.title, article.description || article.excerpt || '');
+            }
+            
+            return {
+              id: article.id.toString(),
+              title: article.title,
+              description: article.description || article.excerpt || 'Read more about this interesting startup topic...',
+              author: article.user.name,
+              publishedAt: article.published_at,
+              url: article.url,
+              coverImage,
+              tags: article.tag_list.slice(0, 3)
+            };
+          })
+        );
         setPosts(formattedPosts);
       } else {
         throw new Error('No posts fetched from APIs');
       }
     } catch (err) {
-      console.log('Using fallback blog posts');
-      // Fallback to sample posts if API fails
-      setPosts(samplePosts);
+      console.log('Using fallback blog posts with generated images');
+      // Fallback to sample posts with generated images
+      const fallbackPosts = await Promise.all(
+        samplePosts.map(async (post) => ({
+          ...post,
+          coverImage: await generateBlogImage(post.title, post.description)
+        }))
+      );
+      setPosts(fallbackPosts);
     } finally {
       setLoading(false);
     }

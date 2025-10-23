@@ -3,7 +3,7 @@ import { GraduationCap, Briefcase, Award, Users, Calendar, MapPin, Clock, Star, 
 import { useTheme } from '../contexts/ThemeContext';
 import AnimatedCard from '../components/AnimatedCard';
 import EnquiryModal from '../components/EnquiryModal';
-import CalendlyWidget from '../components/CalendlyWidget';
+import MeetingScheduler from '../components/MeetingScheduler';
 import mentorsData from '../data/mentors.json';
 import { useNotification } from '../contexts/NotificationContext';
 import { motion } from 'framer-motion';
@@ -33,8 +33,8 @@ const Mentorship: React.FC = () => {
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
   const [expandedMentor, setExpandedMentor] = useState<number | null>(null);
-  const [calendlyOpen, setCalendlyOpen] = useState(false);
-  const [calendlyMentor, setCalendlyMentor] = useState<Mentor | null>(null);
+  const [meetingSchedulerOpen, setMeetingSchedulerOpen] = useState(false);
+  const [selectedMentorForMeeting, setSelectedMentorForMeeting] = useState<Mentor | null>(null);
   const { showNotification } = useNotification();
   const [mentorsRef, mentorsInView] = useInView({
     threshold: 0.1,
@@ -55,12 +55,8 @@ const Mentorship: React.FC = () => {
   };
 
   const handleScheduleMeeting = (mentor: Mentor) => {
-    if (mentor.calendlyUrl) {
-      setCalendlyMentor(mentor);
-      setCalendlyOpen(true);
-    } else {
-      showNotification('Meeting scheduling not available for this mentor yet', 'warning');
-    }
+    setSelectedMentorForMeeting(mentor);
+    setMeetingSchedulerOpen(true);
   };
 
   const toggleExpanded = (mentorId: number) => {
@@ -239,7 +235,7 @@ const Mentorship: React.FC = () => {
                 className={`overflow-hidden transition-all duration-300 cursor-pointer ${
                   expandedMentor === mentor.id ? 'lg:col-span-2' : ''
                 }`}
-                onClick={() => mentor.linkedin && window.open(mentor.linkedin, '_blank', 'noopener,noreferrer')}
+                onClick={() => toggleExpanded(mentor.id)}
               >
               <AnimatedCard className="h-full group hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300">
                 {/* LinkedIn-style Card Header */}
@@ -474,15 +470,14 @@ const Mentorship: React.FC = () => {
         }
       />
 
-      {/* Calendly Widget */}
-      {calendlyMentor && (
-        <CalendlyWidget
-          mentorName={calendlyMentor.name}
-          calendlyUrl={calendlyMentor.calendlyUrl || ''}
-          isOpen={calendlyOpen}
+      {/* Meeting Scheduler */}
+      {selectedMentorForMeeting && (
+        <MeetingScheduler
+          mentor={selectedMentorForMeeting}
+          isOpen={meetingSchedulerOpen}
           onClose={() => {
-            setCalendlyOpen(false);
-            setCalendlyMentor(null);
+            setMeetingSchedulerOpen(false);
+            setSelectedMentorForMeeting(null);
           }}
         />
       )}
