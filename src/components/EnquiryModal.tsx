@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, User, Mail, MessageSquare, CheckCircle } from 'lucide-react';
+import { X, Send, User, Mail, MessageSquare, CheckCircle, Building2, Briefcase, Lightbulb, Target } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -13,7 +13,16 @@ interface FormData {
   name: string;
   email: string;
   message: string;
+  category: string;
 }
+
+const categories = [
+  { value: 'startup-consulting', label: 'Startup Consulting', icon: Building2 },
+  { value: 'product-development', label: 'Product Development', icon: Briefcase },
+  { value: 'mentorship', label: 'Mentorship', icon: Lightbulb },
+  { value: 'fundraising', label: 'Fundraising', icon: Target },
+  { value: 'other', label: 'Other', icon: MessageSquare }
+];
 
 const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
   const { isDark } = useTheme();
@@ -21,12 +30,13 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    category: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -45,6 +55,10 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       showNotification('Please enter a valid email address', 'error');
+      return false;
+    }
+    if (!formData.category) {
+      showNotification('Please select a category', 'error');
       return false;
     }
     if (!formData.message.trim()) {
@@ -77,7 +91,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
       
       // Reset form after 2 seconds
       setTimeout(() => {
-        setFormData({ name: '', email: '', message: '' });
+        setFormData({ name: '', email: '', message: '', category: '' });
         setIsSubmitted(false);
         onClose();
       }, 2000);
@@ -91,7 +105,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setFormData({ name: '', email: '', message: '' });
+      setFormData({ name: '', email: '', message: '', category: '' });
       setIsSubmitted(false);
       onClose();
     }
@@ -219,6 +233,37 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
                         }`}
                         placeholder="Enter your email address"
                       />
+                    </div>
+                  </div>
+
+                  {/* Category Field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Category of Interest *
+                    </label>
+                    <div className="relative">
+                      <Building2 size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleInputChange}
+                        required
+                        className={`w-full pl-10 pr-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all appearance-none ${
+                          isDark 
+                            ? 'bg-slate-800 border-slate-600 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((category) => {
+                          const IconComponent = category.icon;
+                          return (
+                            <option key={category.value} value={category.value}>
+                              {category.label}
+                            </option>
+                          );
+                        })}
+                      </select>
                     </div>
                   </div>
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Calendar, User, ArrowRight, RefreshCw } from 'lucide-react';
+import { ExternalLink, Calendar, User, ArrowRight, RefreshCw, Clock, TrendingUp } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useInView } from 'react-intersection-observer';
 
 interface BlogPost {
   id: string;
@@ -19,6 +20,10 @@ const BlogSection: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ref, inView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true
+  });
 
   // Sample blog posts (in a real app, these would come from an API)
   const samplePosts: BlogPost[] = [
@@ -89,17 +94,45 @@ const BlogSection: React.FC = () => {
     setError(null);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Try multiple APIs for diverse content
+      const apis = [
+        'https://dev.to/api/articles?tag=startup&per_page=3',
+        'https://dev.to/api/articles?tag=entrepreneur&per_page=2',
+        'https://dev.to/api/articles?tag=business&per_page=1'
+      ];
       
-      // In a real app, you would fetch from an actual API
-      // const response = await fetch('https://api.sampleapis.com/futurama/episodes');
-      // const data = await response.json();
+      const responses = await Promise.allSettled(
+        apis.map(url => fetch(url))
+      );
       
-      setPosts(samplePosts);
+      let allPosts: any[] = [];
+      
+      for (const result of responses) {
+        if (result.status === 'fulfilled' && result.value.ok) {
+          const data = await result.value.json();
+          allPosts = [...allPosts, ...data];
+        }
+      }
+      
+      if (allPosts.length > 0) {
+        const formattedPosts = allPosts.slice(0, 6).map((article: any, index: number) => ({
+          id: article.id.toString(),
+          title: article.title,
+          description: article.description || article.excerpt || 'Read more about this interesting startup topic...',
+          author: article.user.name,
+          publishedAt: article.published_at,
+          url: article.url,
+          coverImage: article.cover_image || `https://images.unsplash.com/photo-${1559136555 + index}?w=400&h=250&fit=crop`,
+          tags: article.tag_list.slice(0, 3)
+        }));
+        setPosts(formattedPosts);
+      } else {
+        throw new Error('No posts fetched from APIs');
+      }
     } catch (err) {
-      setError('Failed to load blog posts. Please try again.');
-      console.error('Error fetching blog posts:', err);
+      console.log('Using fallback blog posts');
+      // Fallback to sample posts if API fails
+      setPosts(samplePosts);
     } finally {
       setLoading(false);
     }
@@ -158,14 +191,24 @@ const BlogSection: React.FC = () => {
   }
 
   return (
-    <div className="py-16">
+    <div className="py-16" ref={ref}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={inView ? { scale: 1 } : { scale: 0.8 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-full mb-4"
+          >
+            <TrendingUp size={20} className="text-orange-500" />
+            <span className="text-orange-600 dark:text-orange-400 font-medium">Latest Insights</span>
+          </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Latest Blog Posts
           </h2>
@@ -179,10 +222,14 @@ const BlogSection: React.FC = () => {
           {posts.map((post, index) => (
             <motion.article
               key={post.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -5 }}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              animate={inView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.9 }}
+              transition={{ delay: index * 0.1, duration: 0.6 }}
+              whileHover={{ 
+                y: -8,
+                scale: 1.02,
+                transition: { duration: 0.3 }
+              }}
               className={`group rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ${
                 isDark ? 'bg-slate-800' : 'bg-white'
               }`}
@@ -221,7 +268,7 @@ const BlogSection: React.FC = () => {
                     <span>{post.author}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Calendar size={14} />
+                    <Clock size={14} />
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
                 </div>
@@ -262,3 +309,4 @@ const BlogSection: React.FC = () => {
 };
 
 export default BlogSection;
+

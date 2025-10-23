@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Sparkles, Bot, User } from 'lucide-react';
+import { MessageCircle, Send, X, Sparkles, Bot, User, Zap, Brain, Lightbulb } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,6 +17,7 @@ const AIChatbot: React.FC = () => {
       content: "Hi! I'm your AI Co-Founder Assistant. I can help you with startup advice, strategy, fundraising, product development, and more. What would you like to discuss?"
     }
   ]);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -120,20 +121,36 @@ Context: This is a startup platform called Setu Studios that helps founders with
       <AnimatePresence>
         {!isOpen && (
           <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
+            initial={{ scale: 0, opacity: 0, rotate: -180 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            exit={{ scale: 0, opacity: 0, rotate: 180 }}
+            whileHover={{ 
+              scale: 1.1,
+              boxShadow: "0 0 30px rgba(255, 102, 0, 0.6)"
+            }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-2xl hover:shadow-orange-500/50 group backdrop-blur-sm"
+            className="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-2xl hover:shadow-orange-500/50 group backdrop-blur-sm border-2 border-white/20"
             aria-label="Open AI Assistant"
           >
-            <MessageCircle size={28} />
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Brain size={28} />
+            </motion.div>
             <motion.span 
-              className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"
-              animate={{ scale: [1, 1.2, 1] }}
+              className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
+              animate={{ 
+                scale: [1, 1.3, 1],
+                opacity: [1, 0.7, 1]
+              }}
               transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.div
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-red-500 opacity-0 group-hover:opacity-20"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
             />
           </motion.button>
         )}
@@ -143,34 +160,59 @@ Context: This is a startup platform called Setu Studios that helps founders with
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.8, opacity: 0, y: 20 }}
+            initial={{ scale: 0.8, opacity: 0, y: 20, rotateX: -15 }}
+            animate={{ scale: 1, opacity: 1, y: 0, rotateX: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 20, rotateX: 15 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className={`fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] rounded-2xl shadow-2xl backdrop-blur-xl ${isDark ? 'bg-slate-900/90 border border-orange-500/30' : 'bg-white/90 border border-orange-500/30'} flex flex-col overflow-hidden`}
+            className={`fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] ${isMinimized ? 'h-16' : 'h-[600px] max-h-[calc(100vh-3rem)]'} rounded-2xl shadow-2xl backdrop-blur-xl ${isDark ? 'bg-slate-900/95 border border-orange-500/30' : 'bg-white/95 border border-orange-500/30'} flex flex-col overflow-hidden transition-all duration-300`}
           >
           {/* Header */}
           <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
-                <Sparkles size={20} />
-              </div>
+              <motion.div 
+                className="p-2 bg-white/20 rounded-full backdrop-blur-sm"
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              >
+                <Brain size={20} />
+              </motion.div>
               <div>
                 <h3 className="font-bold text-lg">AI Co-Founder Assistant</h3>
-                <p className="text-xs text-white/80">Always here to help</p>
+                <motion.p 
+                  className="text-xs text-white/80"
+                  animate={{ opacity: [0.8, 1, 0.8] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  Always here to help
+                </motion.p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-              aria-label="Close chat"
-            >
-              <X size={24} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsMinimized(!isMinimized)}
+                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                aria-label={isMinimized ? "Expand chat" : "Minimize chat"}
+              >
+                <motion.div
+                  animate={{ rotate: isMinimized ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <X size={20} />
+                </motion.div>
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                aria-label="Close chat"
+              >
+                <X size={24} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {!isMinimized && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
               <motion.div
                 key={index}
@@ -230,10 +272,12 @@ Context: This is a startup platform called Setu Studios that helps founders with
               </motion.div>
             )}
             <div ref={messagesEndRef} />
-          </div>
+            </div>
+          )}
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className={`p-4 border-t ${isDark ? 'border-slate-700' : 'border-gray-200'}`}>
+          {!isMinimized && (
+            <form onSubmit={handleSubmit} className={`p-4 border-t ${isDark ? 'border-slate-700' : 'border-gray-200'}`}>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -252,7 +296,8 @@ Context: This is a startup platform called Setu Studios that helps founders with
                 <Send size={20} />
               </button>
             </div>
-          </form>
+            </form>
+          )}
           </motion.div>
         )}
       </AnimatePresence>

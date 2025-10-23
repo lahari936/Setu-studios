@@ -6,6 +6,8 @@ import EnquiryModal from '../components/EnquiryModal';
 import CalendlyWidget from '../components/CalendlyWidget';
 import mentorsData from '../data/mentors.json';
 import { useNotification } from '../contexts/NotificationContext';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 
 interface Mentor {
   id: number;
@@ -34,6 +36,10 @@ const Mentorship: React.FC = () => {
   const [calendlyOpen, setCalendlyOpen] = useState(false);
   const [calendlyMentor, setCalendlyMentor] = useState<Mentor | null>(null);
   const { showNotification } = useNotification();
+  const [mentorsRef, mentorsInView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true
+  });
 
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [showUnverified, setShowUnverified] = useState(false);
@@ -146,14 +152,14 @@ const Mentorship: React.FC = () => {
             <div className="flex justify-center mb-4">
               <Users size={40} className="text-orange-500" />
             </div>
-            <h3 className="text-3xl font-bold text-orange-500 mb-2">50+</h3>
+            <h3 className="text-3xl font-bold text-orange-500 mb-2">4</h3>
             <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>Expert Mentors</p>
           </AnimatedCard>
           <AnimatedCard className="text-center p-6">
             <div className="flex justify-center mb-4">
               <Briefcase size={40} className="text-orange-500" />
             </div>
-            <h3 className="text-3xl font-bold text-orange-500 mb-2">15+</h3>
+            <h3 className="text-3xl font-bold text-orange-500 mb-2">4</h3>
             <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>Industry Domains</p>
           </AnimatedCard>
           <AnimatedCard className="text-center p-6">
@@ -217,11 +223,25 @@ const Mentorship: React.FC = () => {
           </div>
 
           {/* Mentors Grid - LinkedIn Style */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-            {filteredMentors.map((mentor) => (
-              <AnimatedCard key={mentor.id} className={`overflow-hidden transition-all duration-300 ${
-                expandedMentor === mentor.id ? 'lg:col-span-2' : ''
-              }`}>
+          <div ref={mentorsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {filteredMentors.map((mentor, index) => (
+              <motion.div
+                key={mentor.id}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={mentorsInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.9 }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                whileHover={{ 
+                  y: -8,
+                  scale: 1.03,
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+                  transition: { duration: 0.3 }
+                }}
+                className={`overflow-hidden transition-all duration-300 cursor-pointer ${
+                  expandedMentor === mentor.id ? 'lg:col-span-2' : ''
+                }`}
+                onClick={() => mentor.linkedin && window.open(mentor.linkedin, '_blank', 'noopener,noreferrer')}
+              >
+              <AnimatedCard className="h-full group hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300">
                 {/* LinkedIn-style Card Header */}
                 <div className="relative">
                   {/* Background Banner */}
@@ -361,21 +381,31 @@ const Mentorship: React.FC = () => {
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => handleScheduleMeeting(mentor)}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25"
                     >
                       <Calendar size={16} />
                       Schedule Meeting
                     </button>
                     <button
                       onClick={() => handleConnect(mentor)}
-                      className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 dark:hover:bg-slate-800 transition-all duration-300"
+                      className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 dark:hover:bg-slate-800 transition-all duration-300 hover:scale-105"
                     >
                       <MessageCircle size={16} />
                       Connect
                     </button>
+                    {mentor.linkedin && (
+                      <button
+                        onClick={() => window.open(mentor.linkedin, '_blank', 'noopener,noreferrer')}
+                        className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 dark:hover:bg-slate-800 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
+                        title="View LinkedIn Profile"
+                      >
+                        <Linkedin size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </AnimatedCard>
+              </motion.div>
             ))}
           </div>
 
