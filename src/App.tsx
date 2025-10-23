@@ -13,6 +13,8 @@ import Mentorship from './pages/Mentorship';
 import Blog from './pages/Blog';
 import SubmitStory from './pages/SubmitStory';
 import LinkedInCallback from './pages/LinkedInCallback';
+import Profile from './pages/Profile';
+import Feed from './pages/Feed';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/submit-story" element={<SubmitStory />} />
                   <Route path="/linkedin-callback" element={<LinkedInCallback />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/feed" element={<Feed />} />
                 </Routes>
               </Layout>
             </Router>

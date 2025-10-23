@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import AnimatedCard from '../components/AnimatedCard';
 import EnquiryModal from '../components/EnquiryModal';
 import MeetingScheduler from '../components/MeetingScheduler';
+import MentorApplicationForm from '../components/MentorApplicationForm';
 import mentorsData from '../data/mentors.json';
 import { useNotification } from '../contexts/NotificationContext';
 import { motion } from 'framer-motion';
@@ -35,6 +36,7 @@ const Mentorship: React.FC = () => {
   const [expandedMentor, setExpandedMentor] = useState<number | null>(null);
   const [meetingSchedulerOpen, setMeetingSchedulerOpen] = useState(false);
   const [selectedMentorForMeeting, setSelectedMentorForMeeting] = useState<Mentor | null>(null);
+  const [mentorApplicationOpen, setMentorApplicationOpen] = useState(false);
   const { showNotification } = useNotification();
   const [mentorsRef, mentorsInView] = useInView({
     threshold: 0.1,
@@ -440,19 +442,35 @@ const Mentorship: React.FC = () => {
         </div>
 
         {/* CTA Section */}
-        <AnimatedCard className="text-center p-12 bg-gradient-to-r from-orange-500/10 to-red-500/10">
-          <h2 className="text-3xl font-bold mb-4">Don't See Your Domain?</h2>
-          <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            We're constantly adding new mentors across various industries. 
-            Reach out to us for personalized mentor matching!
-          </p>
-          <button
-            onClick={() => setEnquiryModalOpen(true)}
-            className="px-8 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
-          >
-            Request Custom Mentor
-          </button>
-        </AnimatedCard>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <AnimatedCard className="text-center p-8 bg-gradient-to-r from-orange-500/10 to-red-500/10">
+            <h2 className="text-2xl font-bold mb-4">Don't See Your Domain?</h2>
+            <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              We're constantly adding new mentors across various industries. 
+              Reach out to us for personalized mentor matching!
+            </p>
+            <button
+              onClick={() => setEnquiryModalOpen(true)}
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
+            >
+              Request Custom Mentor
+            </button>
+          </AnimatedCard>
+
+          <AnimatedCard className="text-center p-8 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+            <h2 className="text-2xl font-bold mb-4">Want to Become a Mentor?</h2>
+            <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              Share your expertise and help other entrepreneurs succeed. 
+              Join our network of verified mentors!
+            </p>
+            <button
+              onClick={() => setMentorApplicationOpen(true)}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-all duration-300 hover:scale-105"
+            >
+              Apply as Mentor
+            </button>
+          </AnimatedCard>
+        </div>
       </div>
 
       {/* Enquiry Modal */}
@@ -481,6 +499,16 @@ const Mentorship: React.FC = () => {
           }}
         />
       )}
+
+      {/* Mentor Application Form */}
+      <MentorApplicationForm
+        isOpen={mentorApplicationOpen}
+        onClose={() => setMentorApplicationOpen(false)}
+        onApplicationSubmitted={() => {
+          setMentorApplicationOpen(false);
+          showNotification('Mentor application submitted! We will review it soon.', 'success');
+        }}
+      />
     </div>
   );
 };

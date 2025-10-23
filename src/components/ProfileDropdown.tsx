@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { User as AppUser } from '../services/database';
-import { ChevronDown, User, Settings, LogOut, Calendar, Package, Bell, Shield } from 'lucide-react';
+import { ChevronDown, User, Settings, LogOut, Calendar, Package, Bell, Shield, BookOpen, Users } from 'lucide-react';
 import { useAuth } from '../contexts/useAuth';
 
 interface ProfileDropdownProps {
@@ -57,6 +57,18 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user, userProfile, is
       label: 'My Profile',
       href: '/profile',
       description: 'View and edit your profile'
+    },
+    {
+      icon: BookOpen,
+      label: 'My Blogs',
+      href: '/profile?tab=posts',
+      description: 'View and manage your blog posts'
+    },
+    {
+      icon: Users,
+      label: 'Feed',
+      href: '/feed',
+      description: 'See posts from the community'
     },
     {
       icon: Calendar,
