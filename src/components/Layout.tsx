@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Menu, X, ArrowUp, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/useAuth';
 import { useSmoothNavigation } from '../hooks/useSmoothNavigation';
-import AIChatbot from './AIChatbot';
-import AuthModal from './AuthModal';
-import ProfileDropdown from './ProfileDropdown';
-import EnquiryModal from './EnquiryModal';
 import logoImage from '/logo.jpg';
+
+// Lazy load heavy components
+const CoFounderX2 = lazy(() => import('./CoFounderX2'));
+const AuthModal = lazy(() => import('./AuthModal'));
+const ProfileDropdown = lazy(() => import('./ProfileDropdown'));
+const EnquiryModal = lazy(() => import('./EnquiryModal'));
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isDark, toggleTheme } = useTheme();
@@ -56,26 +58,28 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
-      isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'
+      isDark 
+        ? 'bg-gradient-to-br from-slate-900 to-slate-800 text-white' 
+        : 'bg-gradient-to-br from-slate-50 to-gray-100 text-slate-900'
     }`}>
       {/* Sticky Navbar */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isDark ? 'bg-slate-900/95' : 'bg-white/95'
       } backdrop-blur-sm border-b ${
-        isDark ? 'border-slate-800' : 'border-slate-200'
+        isDark ? 'border-orange-500/20' : 'border-orange-500/20'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3 group">
-               <div className="w-10 h-10 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
+               <div className="w-10 h-10 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 logo-animate">
                  <img 
                    src={logoImage} 
                    alt="Setu Studios Logo" 
                    className="w-full h-full object-cover scale-150"
                  />
                </div>
-              <span className="text-xl font-bold group-hover:text-orange-500 transition-colors">
+              <span className="text-xl font-bold group-hover:text-orange-500 transition-colors nav-item-hover">
                 Setu Studios
               </span>
             </Link>
@@ -87,9 +91,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   key={item.name}
                   onClick={() => smoothNavigate(item.path)}
                   disabled={isNavigating}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:text-orange-500 disabled:opacity-50 ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:text-orange-500 disabled:opacity-50 nav-item-hover ${
                     isActive(item.path)
-                      ? 'text-orange-500 bg-orange-500/10'
+                      ? 'text-orange-500 bg-orange-500/10 animate-innovation-pulse'
                       : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
                   }`}
                 >
@@ -100,7 +104,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               {/* Enquiry Button */}
               <button
                 onClick={() => setEnquiryModalOpen(true)}
-                className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-500/10 dark:hover:bg-orange-500/10 transition-colors"
               >
                 Get Quote
               </button>
@@ -110,13 +114,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleAuthClick('login')}
-                    className="px-3 py-2 rounded-md text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                    className="px-3 py-2 rounded-md text-sm font-medium bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-500 transition-all duration-300"
                   >
                     Sign in
                   </button>
                   <button
                     onClick={() => handleAuthClick('signup')}
-                    className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                    className="px-3 py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-500/10 dark:hover:bg-orange-500/10 transition-colors"
                   >
                     Sign up
                   </button>
@@ -138,21 +142,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               >
                 <ShoppingCart size={20} className={isDark ? 'text-gray-300' : 'text-gray-700'} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {cartCount}
                   </span>
                 )}
               </Link>
               
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-all duration-200 hover:bg-orange-500/10 hover:text-orange-500 ${
-                  isDark ? 'text-gray-300' : 'text-gray-700'
-                }`}
-              >
-                {isDark ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -164,20 +159,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               >
                 <ShoppingCart size={20} className={isDark ? 'text-gray-300' : 'text-gray-700'} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {cartCount}
                   </span>
                 )}
               </Link>
               
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-all duration-200 hover:bg-orange-500/10 hover:text-orange-500 ${
-                  isDark ? 'text-gray-300' : 'text-gray-700'
-                }`}
-              >
-                {isDark ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
+              <ThemeToggle />
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className={`p-2 rounded-lg transition-all duration-200 hover:bg-orange-500/10 hover:text-orange-500 ${
@@ -252,7 +240,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <div className="px-3 py-2 space-y-3">
                     <div className="flex items-center gap-3">
                       {/* Profile Picture with fallback */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-orange-500 bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-orange-500 bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center">
                         {user.photoURL ? (
                           <img 
                             src={user.photoURL} 
@@ -260,7 +248,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-orange-600 dark:text-orange-400 font-semibold text-lg">
+                          <span className="text-orange-500 font-semibold text-lg">
                             {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -293,7 +281,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         signOut();
                         setIsMenuOpen(false);
                       }} 
-                      className="w-full py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-slate-800 transition-colors"
+                      className="w-full py-2 rounded-md text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-500/10 dark:hover:bg-slate-800 transition-colors"
                     >
                       Logout
                     </button>
@@ -325,28 +313,34 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 p-3 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 hover:scale-110 z-40"
+          className="fixed bottom-8 left-8 p-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full shadow-lg hover:from-orange-600 hover:to-orange-500 transition-all duration-300 hover:scale-110 z-40 glow-effect"
         >
           <ArrowUp size={20} />
         </button>
       )}
 
-      {/* AI Chatbot */}
-      <AIChatbot />
+      {/* CoFounderX 2.0 */}
+      <Suspense fallback={<div className="fixed bottom-4 right-4 w-16 h-16 bg-orange-500 rounded-full animate-pulse"></div>}>
+        <CoFounderX2 />
+      </Suspense>
 
       {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        mode={authMode}
-        onModeChange={setAuthMode}
-      />
+      <Suspense fallback={null}>
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          mode={authMode}
+          onModeChange={setAuthMode}
+        />
+      </Suspense>
 
       {/* Enquiry Modal */}
-      <EnquiryModal
-        isOpen={enquiryModalOpen}
-        onClose={() => setEnquiryModalOpen(false)}
-      />
+      <Suspense fallback={null}>
+        <EnquiryModal
+          isOpen={enquiryModalOpen}
+          onClose={() => setEnquiryModalOpen(false)}
+        />
+      </Suspense>
     </div>
   );
 };
