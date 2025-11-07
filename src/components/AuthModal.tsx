@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/useAuth';
 import { useNotification } from '../contexts/NotificationContext';
 import { X, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import AuthSetupGuide from './AuthSetupGuide';
+import EnhancedSignupForm from './EnhancedSignupForm';
+import ProfileSummary from './ProfileSummary';
 
 // Conditionally import LinkedIn component to prevent errors
 let LinkedInLogin: any = null;
@@ -29,6 +31,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isLinkedInLoading, setIsLinkedInLoading] = useState(false);
+  const [showEnhancedSignup, setShowEnhancedSignup] = useState(false);
+  const [showProfileSummary, setShowProfileSummary] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
 
   // Check if Firebase is configured
   const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
@@ -61,8 +66,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
         onClose();
       } else {
         await signUpWithEmail(email, password);
-        // Success notification is already handled in AuthContext
-        onClose();
+        // For signup, show enhanced profile form
+        setShowEnhancedSignup(true);
       }
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Authentication failed';
@@ -70,6 +75,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleProfileComplete = (data: any) => {
+    setProfileData(data);
+    setShowEnhancedSignup(false);
+    setShowProfileSummary(true);
+    
+    // Store profile data in localStorage
+    localStorage.setItem('userProfile', JSON.stringify(data));
+    showNotification('Profile created successfully!', 'success');
+  };
+
+  const handleProfileEdit = () => {
+    setShowProfileSummary(false);
+    setShowEnhancedSignup(true);
+  };
+
+  const handleProfileFinalComplete = () => {
+    setShowProfileSummary(false);
+    onClose();
   };
 
   const handleGoogleAuth = async () => {
@@ -104,9 +129,33 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
 
   if (!isOpen) return null;
 
+  // Show enhanced signup form
+  if (showEnhancedSignup) {
+    return (
+      <EnhancedSignupForm
+        onComplete={handleProfileComplete}
+        onClose={() => {
+          setShowEnhancedSignup(false);
+          onClose();
+        }}
+      />
+    );
+  }
+
+  // Show profile summary
+  if (showProfileSummary && profileData) {
+    return (
+      <ProfileSummary
+        profileData={profileData}
+        onEdit={handleProfileEdit}
+        onComplete={handleProfileFinalComplete}
+      />
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl">
+      <div className="relative w-full max-w-md theme-bg-primary rounded-xl shadow-2xl theme-border-primary border">
         {/* Close button */}
         <button
           onClick={onClose}

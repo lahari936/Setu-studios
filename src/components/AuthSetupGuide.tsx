@@ -46,7 +46,7 @@ const AuthSetupGuide: React.FC = () => {
                 href="https://console.firebase.google.com/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                className="inline-flex items-center gap-2 text-sm text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300"
               >
                 Open Firebase Console <ExternalLink className="w-4 h-4" />
               </a>
@@ -117,8 +117,8 @@ const AuthSetupGuide: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+            <p className="text-sm text-orange-700 dark:text-orange-300">
               <strong>Note:</strong> For production deployment, make sure to add these environment variables to your hosting platform (Vercel, Netlify, etc.).
             </p>
           </div>

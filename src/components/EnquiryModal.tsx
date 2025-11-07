@@ -135,16 +135,12 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className={`relative w-full max-w-md rounded-2xl shadow-2xl backdrop-blur-xl ${
-              isDark 
-                ? 'bg-slate-900/90 border border-slate-700' 
-                : 'bg-white/90 border border-gray-200'
-            }`}
+            className="relative w-full max-w-md rounded-2xl shadow-2xl backdrop-blur-xl theme-bg-primary theme-border-primary border"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full">
+                <div className="p-2 bg-gradient-to-r from-orange-primary to-orange-secondary rounded-full">
                   <MessageSquare size={20} className="text-white" />
                 </div>
                 <div>
@@ -203,11 +199,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
-                        className={`w-full pl-10 pr-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                          isDark 
-                            ? 'bg-slate-800 border-slate-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-primary/20 focus:border-orange-primary transition-all theme-input"
                         placeholder="Enter your full name"
                       />
                     </div>
@@ -226,11 +218,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className={`w-full pl-10 pr-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                          isDark 
-                            ? 'bg-slate-800 border-slate-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-primary/20 focus:border-orange-primary transition-all theme-input"
                         placeholder="Enter your email address"
                       />
                     </div>
@@ -302,7 +290,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose }) => {
                     className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
                       isSubmitting
                         ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-orange-500/25'
+                        : 'theme-button-primary glow-effect'
                     }`}
                   >
                     {isSubmitting ? (

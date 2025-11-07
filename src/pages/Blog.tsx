@@ -8,23 +8,26 @@ const Blog: React.FC = () => {
   const { isDark } = useTheme();
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDark ? 'bg-gradient-to-br from-slate-900 to-slate-800' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+    }`}>
+      {/* Enhanced Hero Section */}
       <div className="py-20 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <AnimatedCard>
-              <div className="py-12">
-                <div className="flex justify-center mb-6">
-                  <div className="p-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full">
-                    <BookOpen size={48} className="text-white" />
+            <AnimatedCard variant="modern" padding="lg">
+              <div className="py-16">
+                <div className="flex justify-center mb-8">
+                  <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl shadow-2xl animate-idea-spark">
+                    <BookOpen size={56} className="text-white" />
                   </div>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text-entrepreneur animate-startup-rise">
                   Startup Blog & Stories
                 </h1>
-                <p className={`text-lg md:text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Real stories from founders, latest insights, and lessons to fuel your entrepreneurial journey.
+                <p className={`text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Real stories from founders, latest insights, and lessons to fuel your entrepreneurial journey. 
+                  Discover actionable advice and inspiration from successful entrepreneurs.
                 </p>
               </div>
             </AnimatedCard>

@@ -168,7 +168,7 @@ const Feed: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4 loading-innovation"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading feed...</p>
         </div>
       </div>
@@ -176,14 +176,16 @@ const Feed: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen py-20 px-4">
+    <div className={`min-h-screen py-20 px-4 transition-colors duration-300 ${
+      isDark ? 'bg-gradient-to-br from-orange-dark to-slate-900' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+    }`}>
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Startup Feed</h1>
-              <p className="text-gray-600 dark:text-gray-400">Stay updated with the latest insights and activities</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white gradient-text-entrepreneur animate-startup-rise">Startup Feed</h1>
+              <p className="text-gray-600 dark:text-gray-400 animate-business-growth">Stay updated with the latest insights and activities</p>
             </div>
             <button
               onClick={() => setShowBlogEditor(true)}

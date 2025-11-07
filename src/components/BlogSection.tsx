@@ -243,7 +243,7 @@ const BlogSection: React.FC = () => {
             <TrendingUp size={20} className="text-orange-500" />
             <span className="text-orange-600 dark:text-orange-400 font-medium">Latest Insights</span>
           </motion.div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 gradient-text-entrepreneur animate-startup-rise">
             Latest Blog Posts
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">

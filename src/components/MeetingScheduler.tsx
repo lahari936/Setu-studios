@@ -60,31 +60,80 @@ const MeetingScheduler: React.FC<MeetingSchedulerProps> = ({ mentor, isOpen, onC
     setIsSubmitting(true);
 
     try {
-      // Simulate API call to schedule meeting
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Here you would typically send the meeting request to your backend
-      // For now, we'll just show a success message
-      
-      setIsSubmitted(true);
-      showNotification('Meeting request sent successfully! The mentor will contact you soon.', 'success');
-      
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setIsSubmitted(false);
-        setFormData({
-          name: '',
-          email: '',
-          company: '',
-          message: '',
-          preferredDate: '',
-          preferredTime: '',
-          meetingType: 'video-call'
-        });
-        onClose();
-      }, 3000);
+      // Submit booking to backend API
+      const bookingData = {
+        menteeName: formData.name,
+        menteeEmail: formData.email,
+        menteePhone: '',
+        menteeCompany: formData.company,
+        sessionType: formData.meetingType,
+        scheduledDate: formData.preferredDate,
+        scheduledTime: formData.preferredTime,
+        duration: 60,
+        meetingNotes: formData.message
+      };
+
+      const response = await fetch(`/api/mentors/${mentor.id}/book`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Booking created:', result);
+        
+        // Log booking for analytics
+        const analyticsData = {
+          mentorId: mentor.id,
+          mentorName: mentor.name,
+          menteeName: formData.name,
+          menteeEmail: formData.email,
+          sessionType: formData.meetingType,
+          scheduledDate: formData.preferredDate,
+          scheduledTime: formData.preferredTime,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Store booking in localStorage for analytics
+        const existingBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+        existingBookings.push(analyticsData);
+        localStorage.setItem('bookings', JSON.stringify(existingBookings));
+
+        // Store user info for future bookings
+        localStorage.setItem('userInfo', JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company
+        }));
+
+        setIsSubmitted(true);
+        showNotification('Meeting request sent successfully! Confirmation emails have been sent to you, the mentor, and Setu Studios.', 'success');
+        
+        // Reset form after 3 seconds
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormData({
+            name: '',
+            email: '',
+            company: '',
+            message: '',
+            preferredDate: '',
+            preferredTime: '',
+            meetingType: 'video-call'
+          });
+          onClose();
+        }, 3000);
+
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create booking');
+      }
 
     } catch (error) {
+      console.error('Failed to schedule meeting:', error);
       showNotification('Failed to send meeting request. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
@@ -102,12 +151,12 @@ const MeetingScheduler: React.FC<MeetingSchedulerProps> = ({ mentor, isOpen, onC
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="theme-bg-primary rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto theme-border-primary border">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-              <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <div className="p-2 bg-gradient-to-r from-orange-primary/20 to-orange-secondary/20 rounded-lg">
+              <Calendar className="w-5 h-5 text-orange-primary" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">

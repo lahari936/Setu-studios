@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import AnimatedCard from '../components/AnimatedCard';
 import { useNotification } from '../contexts/NotificationContext';
 
 const SubmitStory: React.FC = () => {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
   const { showNotification } = useNotification();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -27,7 +29,9 @@ const SubmitStory: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-20 px-4">
+    <div className={`min-h-screen py-20 px-4 transition-colors duration-300 ${
+      isDark ? 'bg-gradient-to-br from-orange-dark to-slate-900' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+    }`}>
       <div className="container mx-auto max-w-3xl">
         <AnimatedCard className="p-8">
           <h2 className="text-2xl font-bold mb-4">Submit Your Startup Story</h2>

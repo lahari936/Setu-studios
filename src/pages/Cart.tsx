@@ -123,7 +123,9 @@ const Cart: React.FC = () => {
 
   if (checkoutStep === 'success') {
     return (
-      <div className="py-20">
+      <div className={`py-20 transition-colors duration-300 ${
+        isDark ? 'bg-gradient-to-br from-orange-dark to-slate-900' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+      }`}>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedCard className="text-center p-12">
             <div className="flex items-center justify-center mb-6">
@@ -137,8 +139,8 @@ const Cart: React.FC = () => {
              </p>
              
              {createdOrder && (
-               <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg mb-8">
-                 <h3 className="font-semibold text-blue-600 mb-2">Order Details</h3>
+               <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-lg mb-8">
+                 <h3 className="font-semibold text-orange-600 mb-2">Order Details</h3>
                  <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                    Order ID: <span className="font-mono font-bold">#{createdOrder.id.slice(0, 8)}</span>
                  </p>
@@ -171,7 +173,9 @@ const Cart: React.FC = () => {
 
   if (checkoutStep === 'checkout') {
     return (
-      <div className="py-20">
+      <div className={`py-20 transition-colors duration-300 ${
+        isDark ? 'bg-gradient-to-br from-orange-dark to-slate-900' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+      }`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="flex items-center mb-8">
@@ -334,7 +338,9 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <div className="py-20">
+    <div className={`py-20 transition-colors duration-300 ${
+      isDark ? 'bg-gradient-to-br from-orange-dark to-slate-900' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+    }`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
+import { useTheme } from '../contexts/ThemeContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
@@ -8,6 +9,7 @@ const LinkedInCallback: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signInWithLinkedIn } = useAuth();
+  const { isDark } = useTheme();
   const { showNotification } = useNotification();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Processing LinkedIn authentication...');
@@ -77,9 +79,11 @@ const LinkedInCallback: React.FC = () => {
   }, [searchParams, navigate, signInWithLinkedIn, showNotification]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+    <div className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${
+      isDark ? 'bg-gradient-to-br from-orange-dark to-slate-900' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+    }`}>
       <div className="max-w-md w-full mx-4">
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 text-center">
+        <div className={`${isDark ? 'bg-slate-800' : 'bg-white'} rounded-xl shadow-lg p-8 text-center transition-colors duration-300`}>
           <div className="mb-6">
             {status === 'loading' && (
               <div className="mx-auto w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">

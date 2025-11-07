@@ -45,7 +45,7 @@ const Packages: React.FC = () => {
       originalPrice: 399,
       category: 'strategy',
       icon: Search,
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-orange-primary to-orange-secondary',
       image: 'public/insight report.webp',
       features: ['Market size analysis', 'Competitor research', 'SWOT analysis', 'Risk assessment'],
       timeline: '3 Days',
@@ -62,7 +62,7 @@ const Packages: React.FC = () => {
       originalPrice: 499,
       category: 'strategy',
       icon: FileText,
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-orange-primary to-orange-secondary',
       image: '/prd.webp',
       features: ['Feature prioritization', 'Technical specs', 'User journeys', 'Success metrics'],
       timeline: '4 Days',
@@ -96,7 +96,7 @@ const Packages: React.FC = () => {
       originalPrice: 1599,
       category: 'design',
       icon: Palette,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-pink-500 to-pink-600',
       image: '/figma.png',
       features: ['Interactive wireframes', 'User flows', 'Design system', 'Prototype testing'],
       timeline: '7 Days',
@@ -113,7 +113,7 @@ const Packages: React.FC = () => {
       originalPrice: 399,
       category: 'development',
       icon: Code,
-      color: 'from-green-500 to-green-600',
+      color: 'from-orange-500 to-orange-600',
       image: '/mvpp.jpg',
       features: ['Tech stack selection', 'Architecture planning', 'Development timeline', 'Resource allocation'],
       timeline: '3 Days',
@@ -130,7 +130,7 @@ const Packages: React.FC = () => {
       originalPrice: 1999,
       category: 'development',
       icon: Smartphone,
-      color: 'from-green-500 to-green-600',
+      color: 'from-orange-500 to-orange-600',
       image: '/mvp industry.jpg',
       features: ['Platform selection', 'Database design', 'User authentication', 'Deployment setup'],
       timeline: '7-10 Days',
@@ -147,7 +147,7 @@ const Packages: React.FC = () => {
       originalPrice: 899,
       category: 'design',
       icon: Globe,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-pink-500 to-pink-600',
       image: '/ui design.png',
       features: ['SEO optimization', 'Conversion design', 'Mobile responsive', 'Analytics setup'],
       timeline: '4 Days',
@@ -164,7 +164,7 @@ const Packages: React.FC = () => {
       originalPrice: 499,
       category: 'design',
       icon: Palette,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-pink-500 to-pink-600',
       image: '/brandkit.webp',
       features: ['Logo design', 'Color palette', 'Typography', 'Style guide'],
       timeline: '2-3 Days',
@@ -182,7 +182,7 @@ const Packages: React.FC = () => {
       originalPrice: 299,
       category: 'mentorship',
       icon: MessageCircle,
-      color: 'from-indigo-500 to-indigo-600',
+      color: 'from-orange-primary to-orange-secondary',
       image: '/stratergy call.webp',
       features: ['Personalized coaching', 'Problem solving', 'Industry insights', 'Action planning'],
       timeline: '30 mins',
@@ -222,7 +222,7 @@ const Packages: React.FC = () => {
       savings: 400,
       items: ['no-code-mvp', 'landing-page', 'branding'],
       icon: Crown,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-pink-500 to-pink-600',
       image: '/mvp industry.jpg',
       features: ['Functional MVP', 'Marketing site', 'Brand identity'],
       timeline: '12-15 Days',
@@ -239,7 +239,7 @@ const Packages: React.FC = () => {
       savings: 600,
       items: ['no-code-mvp', 'pitch-outline', 'financial-projections', 'strategy-call'],
       icon: Shield,
-      color: 'from-green-500 to-green-600',
+      color: 'from-orange-500 to-orange-600',
       image: '/pitch deck.webp',
       features: ['MVP development', 'Pitch preparation', 'Financial modeling', 'Expert guidance'],
       timeline: '15-20 Days',
@@ -320,49 +320,51 @@ const Packages: React.FC = () => {
   };
 
   return (
-    <div className="py-20">
+    <div className={`py-20 transition-colors duration-300 ${
+      isDark ? 'bg-gradient-to-br from-slate-900 to-slate-800' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Startup Services Store</h1>
-          <p className={`text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            Build your startup with our comprehensive range of services. Mix and match or choose our curated packages.
+        {/* Enhanced Header */}
+        <div className="section-header">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text-entrepreneur animate-startup-rise">Startup Services Store</h1>
+          <p className={`text-xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            Build your startup with our comprehensive range of services. Mix and match individual services or choose our curated packages for maximum value and convenience.
           </p>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search services..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all ${
-                isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'
-              }`}
-            />
-          </div>
-          
-          {/* Category Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === category.id
-                    ? 'bg-orange-500 text-white'
-                    : isDark 
-                      ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <category.icon size={16} />
-                <span>{category.name}</span>
-              </button>
-            ))}
+        {/* Enhanced Search and Filter Bar */}
+        <div className="modern-card p-6 mb-12">
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search services..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="modern-input pl-12 pr-4 py-4 text-lg"
+              />
+            </div>
+            
+            {/* Enhanced Category Filter */}
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium whitespace-nowrap transition-all duration-300 ${
+                    selectedCategory === category.id
+                      ? 'bg-gradient-to-r from-orange-primary to-orange-secondary text-white shadow-lg'
+                      : isDark 
+                        ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:scale-105'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                  }`}
+                >
+                  <category.icon size={18} />
+                  <span>{category.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -370,7 +372,7 @@ const Packages: React.FC = () => {
         <div className="fixed top-4 right-4 z-40">
           <button
             onClick={() => navigate('/cart')}
-            className="relative bg-orange-500 text-white p-3 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 hover:scale-105"
+            className="relative bg-gradient-to-r from-orange-primary to-orange-secondary text-white p-3 rounded-full shadow-lg hover:from-orange-secondary hover:to-orange-primary transition-all duration-300 hover:scale-105 glow-effect"
           >
             <ShoppingCart size={24} />
             {getItemCount() > 0 && (
@@ -386,7 +388,7 @@ const Packages: React.FC = () => {
           <div className="fixed top-20 left-4 z-40">
             <button
               onClick={() => navigate('/cart')}
-              className="bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-orange-600 transition-all duration-300 flex items-center space-x-2"
+              className="bg-gradient-to-r from-orange-primary to-orange-secondary text-white px-6 py-3 rounded-lg shadow-lg hover:from-orange-secondary hover:to-orange-primary transition-all duration-300 flex items-center space-x-2 glow-effect"
             >
               <ShoppingCart size={20} />
               <span>View Cart ({getItemCount()} items)</span>
@@ -398,59 +400,69 @@ const Packages: React.FC = () => {
 
 
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+        {/* Enhanced Products Grid */}
+        <div className="modern-grid">
           {filteredProducts().map((item) => (
-            <AnimatedCard key={item.id} className="group overflow-hidden cursor-pointer" onClick={() => openModal(item)}>
+            <AnimatedCard key={item.id} variant="modern" className="group overflow-hidden cursor-pointer" onClick={() => openModal(item)}>
               <div className="relative">
-                {/* Product Image/Icon */}
-                <div className={`h-48 bg-gradient-to-r ${item.color} flex items-center justify-center relative`}>
-                  <item.icon size={48} className="text-white" />
+                {/* Enhanced Product Image/Icon */}
+                <div className={`h-56 bg-gradient-to-br ${item.color} flex items-center justify-center relative overflow-hidden`}>
+                  <item.icon size={56} className="text-white drop-shadow-lg" />
+                  {item.popular && (
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      Popular
+                    </div>
+                  )}
                 </div>
 
-                {/* Product Info */}
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-lg line-clamp-2">{item.name}</h3>
+                {/* Enhanced Product Info */}
+                <div className="p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-bold text-xl line-clamp-2">{item.name}</h3>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         openModal(item);
                       }}
-                      className="p-1 text-gray-400 hover:text-orange-500 transition-colors"
+                      className="p-2 text-gray-400 hover:text-orange-500 transition-colors rounded-lg hover:bg-orange-500/10"
                     >
-                      <Eye size={16} />
+                      <Eye size={18} />
                     </button>
                   </div>
                   
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-3 line-clamp-2`}>
+                  <p className={`text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
                     {item.description}
                   </p>
 
-                  {/* Price */}
-                  <div className="flex items-center space-x-2 mb-4">
-                    <span className="text-2xl font-bold text-orange-500">₹{item.price}</span>
+                  {/* Enhanced Price */}
+                  <div className="flex items-center space-x-3">
+                    <span className="text-3xl font-bold gradient-text">₹{item.price}</span>
                     {item.originalPrice && item.originalPrice > item.price && (
-                      <span className={`text-sm line-through ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      <span className={`text-lg line-through ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                         ₹{item.originalPrice}
+                      </span>
+                    )}
+                    {item.originalPrice && item.originalPrice > item.price && (
+                      <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        Save ₹{item.originalPrice - item.price}
                       </span>
                     )}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                  {/* Enhanced Action Buttons */}
+                  <div className="flex space-x-3" onClick={(e) => e.stopPropagation()}>
                     {addedItems.has(item.name) ? (
                       <button
                         disabled
-                        className="flex-1 bg-green-500 text-white py-2 px-3 rounded-lg text-sm font-medium cursor-not-allowed flex items-center justify-center space-x-1"
+                        className="flex-1 bg-green-500 text-white py-3 px-4 rounded-xl text-sm font-medium cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
                       >
-                        <CheckCircle size={16} />
+                        <CheckCircle size={18} />
                         <span>Added to Cart</span>
                       </button>
                     ) : (
                       <button
                         onClick={() => addToCart(item, selectedCategory === 'combos' ? 'combo' : 'individual')}
-                        className="flex-1 bg-orange-500 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+                        className="btn-primary flex-1 text-sm py-3"
                       >
                         Add to Cart
                       </button>
@@ -460,7 +472,7 @@ const Packages: React.FC = () => {
                         addToCart(item, selectedCategory === 'combos' ? 'combo' : 'individual');
                         navigate('/cart');
                       }}
-                      className="flex-1 border border-orange-500 text-orange-500 py-2 px-3 rounded-lg text-sm font-medium hover:bg-orange-500 hover:text-white transition-colors"
+                      className="btn-secondary flex-1 text-sm py-3"
                     >
                       Buy Now
                     </button>
@@ -541,7 +553,7 @@ const Packages: React.FC = () => {
                           addToCart(selectedItem, selectedCategory === 'combos' ? 'combo' : 'individual');
                           closeModal();
                         }}
-                        className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                        className="flex-1 bg-gradient-to-r from-orange-primary to-orange-secondary text-white py-3 rounded-lg font-semibold hover:from-orange-secondary hover:to-orange-primary transition-all duration-300 glow-effect"
                       >
                         Add to Cart
                       </button>
@@ -552,7 +564,7 @@ const Packages: React.FC = () => {
                         closeModal();
                         navigate('/cart');
                       }}
-                      className="flex-1 border border-orange-500 text-orange-500 py-3 rounded-lg font-semibold hover:bg-orange-500 hover:text-white transition-colors"
+                      className="flex-1 border border-orange-primary text-orange-primary py-3 rounded-lg font-semibold hover:bg-orange-primary hover:text-white transition-all duration-300 neon-border"
                     >
                       Buy Now
                     </button>

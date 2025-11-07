@@ -6,16 +6,16 @@
     "expertise": "Software Development, System Architecture, Cloud Solutions",
     "photo": "https://ui-avatars.com/api/?name=Prasad+Anumula&background=f97316&color=fff&size=400",
     "experience": "8+ years",
-    "company": "Tech Leader",
+    "company": "Senior Software Engineer",
     "verified": true,
-    "bio": "Experienced technology professional with expertise in software development and system architecture. Passionate about helping startups build scalable and robust technical solutions.",
+    "bio": "Experienced software engineer with 8+ years in full-stack development, system architecture, and cloud solutions. Passionate about building scalable applications and mentoring developers. Currently leading development of microservices architecture and cloud-based solutions.",
     "linkedin": "https://www.linkedin.com/in/prasad-anumula",
     "email": "prasad@example.com",
     "calendlyUrl": "https://calendly.com/setu-studios/mentorship-session",
-    "location": "Remote",
+    "location": "Hyderabad, India",
     "rating": 4.8,
     "sessionsCompleted": 45,
-    "specialties": ["Software Development", "System Architecture", "Cloud Solutions", "Technical Strategy", "Code Review"]
+    "specialties": ["JavaScript", "Python", "React", "Node.js", "AWS", "Docker", "Kubernetes"]
   },
   {
     "id": 2,
@@ -24,16 +24,16 @@
     "expertise": "Business Development, Operations, Strategic Planning",
     "photo": "https://ui-avatars.com/api/?name=Esaieshwar&background=f97316&color=fff&size=400",
     "experience": "6+ years",
-    "company": "Business Consultant",
+    "company": "Business Strategy Consultant",
     "verified": true,
-    "bio": "Business strategist with extensive experience in operations and business development. Specializes in helping startups optimize their processes and scale efficiently.",
+    "bio": "Business strategist with 6+ years of experience in operations, business development, and strategic planning. Specializes in helping startups optimize processes and scale efficiently. Currently helping startups and SMEs optimize operations and develop growth strategies.",
     "linkedin": "https://www.linkedin.com/in/esaieshwar",
     "email": "esaieshwar@example.com",
     "calendlyUrl": "https://calendly.com/setu-studios/mentorship-session",
-    "location": "Remote",
+    "location": "Bangalore, India",
     "rating": 4.7,
     "sessionsCompleted": 32,
-    "specialties": ["Business Strategy", "Operations", "Process Optimization", "Growth Planning", "Market Analysis"]
+    "specialties": ["Business Strategy", "Operations Management", "Process Optimization", "Growth Planning", "Market Analysis"]
   },
   {
     "id": 3,
@@ -44,14 +44,14 @@
     "experience": "7+ years",
     "company": "Product Innovation Lead",
     "verified": true,
-    "bio": "Product innovation expert with a focus on user-centered design and market-driven product development. Helps startups create products that users love and markets demand.",
+    "bio": "Product innovation expert with 7+ years in product management, user experience design, and market-driven product development. Passionate about creating products that users love. Currently leading product innovation initiatives and user experience improvements.",
     "linkedin": "https://www.linkedin.com/in/yugmallik",
     "email": "yugmallik@example.com",
     "calendlyUrl": "https://calendly.com/setu-studios/mentorship-session",
-    "location": "Remote",
+    "location": "Mumbai, India",
     "rating": 4.9,
     "sessionsCompleted": 58,
-    "specialties": ["Product Management", "Innovation", "User Experience", "Market Research", "Product Strategy"]
+    "specialties": ["Product Management", "UX Design", "Market Research", "User Research", "Product Strategy", "Figma"]
   },
   {
     "id": 4,
@@ -62,13 +62,13 @@
     "experience": "5+ years",
     "company": "Business Development Expert",
     "verified": true,
-    "bio": "Business development professional with extensive experience in strategic planning and growth initiatives. Specializes in helping startups scale their business operations and market reach.",
+    "bio": "Business development professional with 5+ years of experience in strategic planning, growth initiatives, and partnership development. Specializes in helping startups scale their business operations. Currently developing strategic partnerships and growth initiatives for startups.",
     "linkedin": "https://www.linkedin.com/in/vamshicentle",
     "email": "vamshi@example.com",
     "calendlyUrl": "https://calendly.com/setu-studios/mentorship-session",
-    "location": "Remote",
+    "location": "Chennai, India",
     "rating": 4.6,
     "sessionsCompleted": 28,
-    "specialties": ["Business Development", "Strategic Planning", "Growth Strategy", "Market Expansion", "Partnership Development"]
+    "specialties": ["Business Development", "Strategic Planning", "Growth Strategy", "Partnership Development", "Market Expansion"]
   }
 ]

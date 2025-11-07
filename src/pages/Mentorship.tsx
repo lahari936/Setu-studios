@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Briefcase, Award, Users, Calendar, MapPin, Clock, Star, ExternalLink, ChevronDown, ChevronUp, Linkedin, Mail, MessageCircle } from 'lucide-react';
+import { GraduationCap, Briefcase, Award, Users } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import AnimatedCard from '../components/AnimatedCard';
 import EnquiryModal from '../components/EnquiryModal';
 import MeetingScheduler from '../components/MeetingScheduler';
 import MentorApplicationForm from '../components/MentorApplicationForm';
+import MentorProfileCard from '../components/MentorProfileCard';
+import UserTypeSelector from '../components/UserTypeSelector';
 import mentorsData from '../data/mentors.json';
 import { useNotification } from '../contexts/NotificationContext';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { getLinkedInProfile } from '../services/linkedinService';
+import { UserType } from '../components/UserTypeSelector';
 
 interface Mentor {
   id: number;
@@ -33,10 +37,11 @@ const Mentorship: React.FC = () => {
   const { isDark } = useTheme();
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
-  const [expandedMentor, setExpandedMentor] = useState<number | null>(null);
   const [meetingSchedulerOpen, setMeetingSchedulerOpen] = useState(false);
   const [selectedMentorForMeeting, setSelectedMentorForMeeting] = useState<Mentor | null>(null);
   const [mentorApplicationOpen, setMentorApplicationOpen] = useState(false);
+  const [userTypeSelectorOpen, setUserTypeSelectorOpen] = useState(false);
+  const [userType, setUserType] = useState<UserType | null>(null);
   const { showNotification } = useNotification();
   const [mentorsRef, mentorsInView] = useInView({
     threshold: 0.1,
@@ -47,6 +52,8 @@ const Mentorship: React.FC = () => {
   const [showUnverified, setShowUnverified] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [mentorsPerPage] = useState(8); // Show 8 mentors per page (2 rows of 4)
 
   // Form state for mentor submission
   const [form, setForm] = useState({ name: '', designation: '', experience: '', sectors: '', bio: '', linkedin: '' });
@@ -56,14 +63,17 @@ const Mentorship: React.FC = () => {
     setEnquiryModalOpen(true);
   };
 
+  const handleUserTypeSelected = (selectedUserType: UserType) => {
+    setUserType(selectedUserType);
+    setUserTypeSelectorOpen(false);
+    showNotification(`Welcome ${selectedUserType}! Your profile has been customized.`, 'success');
+  };
+
   const handleScheduleMeeting = (mentor: Mentor) => {
     setSelectedMentorForMeeting(mentor);
     setMeetingSchedulerOpen(true);
   };
 
-  const toggleExpanded = (mentorId: number) => {
-    setExpandedMentor(expandedMentor === mentorId ? null : mentorId);
-  };
 
   useEffect(() => {
     // Load mentors from localStorage first, fall back to bundled data
@@ -89,6 +99,17 @@ const Mentorship: React.FC = () => {
     
     return matchesSearch && matchesDomain && matchesVerification;
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredMentors.length / mentorsPerPage);
+  const startIndex = (currentPage - 1) * mentorsPerPage;
+  const endIndex = startIndex + mentorsPerPage;
+  const currentMentors = filteredMentors.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDomain, showUnverified]);
 
   // Get unique domains for filter
   const domains = Array.from(new Set(mentors.map(m => m.domain)));
@@ -122,50 +143,58 @@ const Mentorship: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-20 px-4">
+    <div className={`min-h-screen py-20 px-4 transition-colors duration-300 ${
+      isDark ? 'bg-gradient-to-br from-orange-dark to-slate-900' : 'bg-gradient-to-br from-slate-50 to-gray-100'
+    }`}>
       <div className="container mx-auto max-w-7xl">
-        {/* Hero Section */}
+        {/* Enhanced Hero Section */}
         <div className="text-center mb-16">
-          <AnimatedCard>
-            <div className="py-12">
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full">
-                  <GraduationCap size={48} className="text-white" />
+          <AnimatedCard variant="modern" padding="lg">
+            <div className="py-16">
+              <div className="flex justify-center mb-8">
+                <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl shadow-2xl animate-mentor-guidance">
+                  <GraduationCap size={56} className="text-white" />
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text-entrepreneur animate-startup-rise">
                 Mentorship Marketplace
               </h1>
-              <p className={`text-lg md:text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              <p className={`text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                 Connect with industry experts who can guide you through your startup journey. 
-                Get personalized advice, strategic insights, and actionable feedback.
+                Get personalized advice, strategic insights, and actionable feedback from proven leaders.
               </p>
             </div>
           </AnimatedCard>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <AnimatedCard className="text-center p-6">
-            <div className="flex justify-center mb-4">
-              <Users size={40} className="text-orange-500" />
+        {/* Enhanced Stats Section */}
+        <div className="modern-grid-3 mb-16">
+          <AnimatedCard variant="modern" className="text-center p-8">
+            <div className="flex justify-center mb-6">
+              <div className="p-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-lg">
+                <Users size={48} className="text-white" />
+              </div>
             </div>
-            <h3 className="text-3xl font-bold text-orange-500 mb-2">4</h3>
-            <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>Expert Mentors</p>
+            <h3 className="text-4xl font-bold gradient-text mb-3">4</h3>
+            <p className={`text-lg font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Expert Mentors</p>
           </AnimatedCard>
-          <AnimatedCard className="text-center p-6">
-            <div className="flex justify-center mb-4">
-              <Briefcase size={40} className="text-orange-500" />
+          <AnimatedCard variant="modern" className="text-center p-8">
+            <div className="flex justify-center mb-6">
+              <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg">
+                <Briefcase size={48} className="text-white" />
+              </div>
             </div>
-            <h3 className="text-3xl font-bold text-orange-500 mb-2">4</h3>
-            <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>Industry Domains</p>
+            <h3 className="text-4xl font-bold gradient-text-purple mb-3">4</h3>
+            <p className={`text-lg font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Industry Domains</p>
           </AnimatedCard>
-          <AnimatedCard className="text-center p-6">
-            <div className="flex justify-center mb-4">
-              <Award size={40} className="text-orange-500" />
+          <AnimatedCard variant="modern" className="text-center p-8">
+            <div className="flex justify-center mb-6">
+              <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl shadow-lg">
+                <Award size={48} className="text-white" />
+              </div>
             </div>
-            <h3 className="text-3xl font-bold text-orange-500 mb-2">200+</h3>
-            <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>Success Stories</p>
+            <h3 className="text-4xl font-bold gradient-text-blue mb-3">200+</h3>
+            <p className={`text-lg font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Success Stories</p>
           </AnimatedCard>
         </div>
 
@@ -220,191 +249,87 @@ const Mentorship: React.FC = () => {
             </div>
           </div>
 
-          {/* Mentors Grid - LinkedIn Style */}
-          <div ref={mentorsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-            {filteredMentors.map((mentor, index) => (
+          {/* Mentors Grid - 4 cards per row with navigation */}
+          <div className="max-w-7xl mx-auto">
+            <div ref={mentorsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {currentMentors.map((mentor, index) => {
+                const linkedinProfile = getLinkedInProfile(mentor.name);
+                return (
               <motion.div
                 key={mentor.id}
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 animate={mentorsInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.9 }}
                 transition={{ delay: index * 0.1, duration: 0.6 }}
-                whileHover={{ 
-                  y: -8,
-                  scale: 1.03,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-                  transition: { duration: 0.3 }
-                }}
-                className={`overflow-hidden transition-all duration-300 cursor-pointer ${
-                  expandedMentor === mentor.id ? 'lg:col-span-2' : ''
-                }`}
-                onClick={() => toggleExpanded(mentor.id)}
-              >
-              <AnimatedCard className="h-full group hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300">
-                {/* LinkedIn-style Card Header */}
-                <div className="relative">
-                  {/* Background Banner */}
-                  <div className="h-20 bg-gradient-to-r from-orange-500 to-red-500"></div>
-                  
-                  {/* Profile Picture */}
-                  <div className="absolute -bottom-8 left-6">
-                    <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                      <img 
-                        src={mentor.photo} 
-                        alt={mentor.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${mentor.name}&size=128&background=f97316&color=fff`;
-                        }}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Expand/Collapse Button */}
-                  <button
-                    onClick={() => toggleExpanded(mentor.id)}
-                    className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
                   >
-                    {expandedMentor === mentor.id ? (
-                      <ChevronUp size={20} className="text-white" />
-                    ) : (
-                      <ChevronDown size={20} className="text-white" />
-                    )}
-                  </button>
+                    <MentorProfileCard
+                      mentor={mentor}
+                      linkedinProfile={linkedinProfile}
+                      userType={userType}
+                      onConnect={handleConnect}
+                      onScheduleMeeting={handleScheduleMeeting}
+                    />
+                  </motion.div>
+                );
+              })}
                 </div>
+          </div>
 
-                {/* Card Content */}
-                <div className="pt-10 px-6 pb-6">
-                  {/* Basic Info */}
-                  <div className="mb-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{mentor.name}</h3>
-                        <p className="text-orange-500 font-semibold">{mentor.domain}</p>
-                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {mentor.company}
-                        </p>
-                      </div>
-                      {mentor.verified && (
-                        <div className="flex items-center gap-1 text-green-600">
-                          <Award size={16} />
-                          <span className="text-xs font-semibold">Verified</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Rating and Sessions */}
-                    <div className="flex items-center gap-4 text-sm mb-3">
-                      {mentor.rating && (
-                        <div className="flex items-center gap-1">
-                          <Star size={16} className="text-yellow-500 fill-current" />
-                          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>
-                            {mentor.rating} ({mentor.sessionsCompleted || 0} sessions)
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <MapPin size={16} className="text-orange-500" />
-                        <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                          {mentor.location || 'Remote'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Expanded Content */}
-                  {expandedMentor === mentor.id && (
-                    <div className="space-y-4 border-t pt-4">
-                      {/* Bio */}
-                      {mentor.bio && (
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">About</h4>
-                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} leading-relaxed`}>
-                            {mentor.bio}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Specialties */}
-                      {mentor.specialties && (
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Specialties</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {mentor.specialties.map((specialty, index) => (
-                              <span
-                                key={index}
-                                className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded-full"
-                              >
-                                {specialty}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Experience Details */}
-                      <div className="flex items-center gap-2 text-sm">
-                        <Briefcase size={16} className="text-orange-500" />
-                        <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                          {mentor.experience} Experience
-                        </span>
-                      </div>
-
-                      {/* Contact Links */}
-                      <div className="flex items-center gap-4">
-                        {mentor.linkedin && (
-                          <a
-                            href={mentor.linkedin}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
-                          >
-                            <Linkedin size={16} />
-                            LinkedIn
-                          </a>
-                        )}
-                        {mentor.email && (
-                          <a
-                            href={`mailto:${mentor.email}`}
-                            className="flex items-center gap-2 text-gray-600 hover:text-gray-700 text-sm"
-                          >
-                            <Mail size={16} />
-                            Email
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-3 mt-4">
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-colors"
+              >
+                Previous
+              </button>
+              
+              <div className="flex gap-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
                     <button
-                      onClick={() => handleScheduleMeeting(mentor)}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25"
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-2 rounded-lg font-semibold transition-colors ${
+                        currentPage === pageNum
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30'
+                      }`}
                     >
-                      <Calendar size={16} />
-                      Schedule Meeting
+                      {pageNum}
                     </button>
-                    <button
-                      onClick={() => handleConnect(mentor)}
-                      className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 dark:hover:bg-slate-800 transition-all duration-300 hover:scale-105"
-                    >
-                      <MessageCircle size={16} />
-                      Connect
-                    </button>
-                    {mentor.linkedin && (
-                      <button
-                        onClick={() => window.open(mentor.linkedin, '_blank', 'noopener,noreferrer')}
-                        className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 dark:hover:bg-slate-800 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
-                        title="View LinkedIn Profile"
-                      >
-                        <Linkedin size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </AnimatedCard>
-              </motion.div>
-            ))}
+                  );
+                })}
+              </div>
+              
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          )}
+
+          {/* Results Summary */}
+          <div className="text-center mt-4">
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredMentors.length)} of {filteredMentors.length} mentors
+              {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
+            </p>
           </div>
 
           {/* No Results */}
@@ -457,7 +382,7 @@ const Mentorship: React.FC = () => {
             </button>
           </AnimatedCard>
 
-          <AnimatedCard className="text-center p-8 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+          <AnimatedCard className="text-center p-8 bg-gradient-to-r from-orange-500/10 to-orange-600/10">
             <h2 className="text-2xl font-bold mb-4">Want to Become a Mentor?</h2>
             <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
               Share your expertise and help other entrepreneurs succeed. 
@@ -465,12 +390,30 @@ const Mentorship: React.FC = () => {
             </p>
             <button
               onClick={() => setMentorApplicationOpen(true)}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-all duration-300 hover:scale-105"
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
             >
               Apply as Mentor
             </button>
           </AnimatedCard>
         </div>
+
+        {/* User Type Selection Button */}
+        {!userType && (
+          <div className="text-center mb-12">
+            <AnimatedCard className="max-w-2xl mx-auto p-8 bg-gradient-to-r from-orange-500/10 to-orange-600/10">
+              <h2 className="text-2xl font-bold mb-4">Get Personalized Experience</h2>
+              <p className={`text-lg mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                Tell us about yourself to get customized mentor recommendations and features!
+              </p>
+              <button
+                onClick={() => setUserTypeSelectorOpen(true)}
+                className="px-8 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-all duration-300 hover:scale-105"
+              >
+                Tell Us About Yourself
+              </button>
+            </AnimatedCard>
+          </div>
+        )}
       </div>
 
       {/* Enquiry Modal */}
@@ -508,6 +451,13 @@ const Mentorship: React.FC = () => {
           setMentorApplicationOpen(false);
           showNotification('Mentor application submitted! We will review it soon.', 'success');
         }}
+      />
+
+      {/* User Type Selector */}
+      <UserTypeSelector
+        isOpen={userTypeSelectorOpen}
+        onClose={() => setUserTypeSelectorOpen(false)}
+        onUserTypeSelected={handleUserTypeSelected}
       />
     </div>
   );

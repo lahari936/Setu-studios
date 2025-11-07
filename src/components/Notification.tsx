@@ -32,7 +32,7 @@ const Notification: React.FC<NotificationProps> = ({
       case 'error':
         return <AlertCircle size={20} className="text-red-500" />;
       default:
-        return <AlertCircle size={20} className="text-blue-500" />;
+        return <AlertCircle size={20} className="text-orange-500" />;
     }
   };
 
